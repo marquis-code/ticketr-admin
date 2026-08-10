@@ -170,9 +170,9 @@ async function loadTenantSettings() {
         form.value.primaryColor = data.tenant.primaryColor || '#4f46e5';
         form.value.secondaryColor = data.tenant.secondaryColor || '#0f172a';
         form.value.paystackSubaccountCode = data.tenant.paystackSubaccountCode || '';
-        form.value.bankName = data.tenant.bankName || '';
-        form.value.accountNumber = data.tenant.accountNumber || '';
-        form.value.accountName = data.tenant.accountName || '';
+        form.value.bankName = data.tenant.remittanceAccount?.bankName || data.tenant.bankName || '';
+        form.value.accountNumber = data.tenant.remittanceAccount?.accountNumber || data.tenant.accountNumber || '';
+        form.value.accountName = data.tenant.remittanceAccount?.accountName || data.tenant.accountName || '';
       }
     }
   } catch (err) {
@@ -192,6 +192,17 @@ async function saveSettings() {
       .map(e => e.trim())
       .filter(e => e.length > 0);
     delete payload.notificationEmailsStr;
+
+    payload.remittanceAccount = {
+      bankName: form.value.bankName,
+      accountNumber: form.value.accountNumber,
+      accountName: form.value.accountName
+    };
+    
+    // Cleanup flat fields
+    delete payload.bankName;
+    delete payload.accountNumber;
+    delete payload.accountName;
 
     const res = await fetch(`${config.public.apiBase}/tenants/${tenantId.value}`, {
       method: 'PATCH',

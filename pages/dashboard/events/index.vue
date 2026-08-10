@@ -85,13 +85,17 @@
               <NuxtLink :to="`/dashboard/events/${ev._id}/attendees`" class="btn-secondary text-[11px] !py-2 text-center block">
                 📋 Attendee Roster
               </NuxtLink>
-              <button @click="deleteEvent(ev._id)" class="text-[11px] text-rose-400 hover:bg-rose-500/10 border border-rose-500/30 font-semibold py-2 rounded-xl transition">
+              <button @click="triggerImageUpload(ev._id)" class="text-[11px] text-primary hover:bg-primary/10 border border-primary/30 font-semibold py-2 rounded-xl transition">
+                🖼 Edit Image
+              </button>
+              <button @click="deleteEvent(ev._id)" class="col-span-2 text-[11px] text-rose-400 hover:bg-rose-500/10 border border-rose-500/30 font-semibold py-2 rounded-xl transition">
                 🗑 Delete Event
               </button>
             </div>
           </div>
         </div>
       </div>
+      <input type="file" ref="imageUploadInput" class="hidden" accept="image/*" @change="handleImageUpload" />
     </main>
   </div>
 </template>
@@ -104,6 +108,8 @@ const config = useRuntimeConfig();
 const events = ref([]);
 const loading = ref(true);
 const search = ref('');
+const imageUploadInput = ref(null);
+const currentEditingEventId = ref(null);
 
 const filteredEvents = computed(() => {
   if (!search.value) return events.value;
@@ -145,6 +151,45 @@ async function deleteEvent(eventId) {
     }
   } catch (e) {
     console.error(e);
+  }
+}
+
+function triggerImageUpload(eventId) {
+  currentEditingEventId.value = eventId;
+  if (imageUploadInput.value) {
+    imageUploadInput.value.click();
+  }
+}
+
+async function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file || !currentEditingEventId.value) return;
+  
+  const token = localStorage.getItem('ticketr_admin_token');
+  const formData = new FormData();
+  formData.append('banner', file);
+
+  try {
+    const res = await fetch(`${config.public.apiBase}/events/${currentEditingEventId.value}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    
+    if (res.ok) {
+      alert('Event image updated successfully!');
+      await loadEvents();
+    } else {
+      const err = await res.json();
+      alert(err.message || 'Failed to update image');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Network error while updating image');
+  } finally {
+    // Reset file input
+    e.target.value = null;
+    currentEditingEventId.value = null;
   }
 }
 

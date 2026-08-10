@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+  <div class="min-h-screen   flex flex-col">
     <!-- Top Bar -->
-    <header class="glass-card border-b border-slate-800 px-6 py-4">
+    <header class="glass-card border-b border-gray-200 px-6 py-4">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
-        <NuxtLink to="/dashboard" class="text-sm font-semibold text-slate-400 hover:text-white transition">
+        <NuxtLink to="/dashboard" class="text-sm font-semibold text-gray-600 hover:text-gray-900 transition">
           ← Dashboard
         </NuxtLink>
         <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
@@ -14,12 +14,12 @@
     </header>
 
     <main class="max-w-xl mx-auto px-6 py-12 flex-grow w-full space-y-6">
-      <div class="glass-card rounded-2xl p-8 border-indigo-500/30 text-center">
-        <div class="w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
+      <div class="glass-card rounded-2xl p-8 border-primary/30 text-center">
+        <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
           🔍
         </div>
-        <h1 class="text-2xl font-extrabold text-white mb-2">Gate Entry Scanner</h1>
-        <p class="text-xs text-slate-400 mb-6">Scan QR code or paste HMAC hash token from attendee's e-ticket.</p>
+        <h1 class="text-2xl font-extrabold text-gray-900 mb-2">Gate Entry Scanner</h1>
+        <p class="text-xs text-gray-600 mb-6">Scan QR code or paste HMAC hash token from attendee's e-ticket.</p>
 
         <form @submit.prevent="verifyTicketScan" class="space-y-4">
           <div class="relative">
@@ -28,7 +28,7 @@
               type="text"
               placeholder="Paste QR Code Hash / Scan..."
               required
-              class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition text-center font-mono"
+              class="w-full  border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition text-center font-mono"
             />
           </div>
 
@@ -47,16 +47,16 @@
           </div>
 
           <div class="flex-grow space-y-1">
-            <h3 class="font-bold text-lg text-white">
+            <h3 class="font-bold text-lg text-gray-900">
               {{ scanResult.message }}
             </h3>
-            <p v-if="scanResult.attendeeName" class="text-sm font-semibold text-indigo-300">
+            <p v-if="scanResult.attendeeName" class="text-sm font-semibold text-primary">
               Attendee: {{ scanResult.attendeeName }}
             </p>
-            <p v-if="scanResult.tierName" class="text-xs text-slate-300">
+            <p v-if="scanResult.tierName" class="text-xs text-gray-700">
               Ticket Tier: {{ scanResult.tierName }} ({{ scanResult.ticketNumber }})
             </p>
-            <p v-if="scanResult.checkedInAt" class="text-[11px] text-slate-400 pt-2 border-t border-slate-800 mt-2">
+            <p v-if="scanResult.checkedInAt" class="text-[11px] text-gray-600 pt-2 border-t border-gray-200 mt-2">
               Scanned At: {{ new Date(scanResult.checkedInAt).toLocaleString() }}
             </p>
           </div>
@@ -76,7 +76,7 @@ const verifying = ref(false);
 const scanResult = ref(null);
 
 async function verifyTicketScan() {
-  const token = localStorage.getItem('cmt_token');
+  const token = localStorage.getItem('ticketr_admin_token');
   if (!token) {
     alert('Please log in to use gate scanner.');
     useRouter().push('/login');

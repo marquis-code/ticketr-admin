@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'CMultiTickets - Organizer Admin Dashboard',
+      title: 'Ticketr - Organizer Admin Dashboard',
       meta: [{ name: 'description', content: 'Manage events, ticket tiers, revenue, and check-in attendees.' }],
       link: [
         { rel: 'stylesheet', href: 'https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&f[]=satoshi@300,400,500,700,900&display=swap' },

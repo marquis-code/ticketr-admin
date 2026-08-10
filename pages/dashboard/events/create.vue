@@ -1,107 +1,107 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+  <div class="min-h-screen   flex flex-col">
     <!-- Navbar -->
-    <header class="glass-card border-b border-slate-800/80 px-6 py-4">
+    <header class="glass-card border-b border-gray-200/80 px-6 py-4">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
-        <NuxtLink to="/dashboard" class="text-sm font-semibold text-slate-400 hover:text-white transition">
+        <NuxtLink to="/dashboard" class="text-sm font-semibold text-gray-600 hover:text-gray-900 transition">
           ← Cancel & Back to Dashboard
         </NuxtLink>
-        <span class="text-xs font-bold text-indigo-400">Event Creator Wizard</span>
+        <span class="text-xs font-bold text-primary">Event Creator Wizard</span>
       </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-6 py-8 flex-grow w-full">
-      <div class="glass-card rounded-2xl p-8 border-indigo-500/30">
-        <h1 class="text-2xl font-extrabold text-white mb-6">Create New Event</h1>
+      <div class="glass-card rounded-2xl p-8 border-primary/30">
+        <h1 class="text-2xl font-extrabold text-gray-900 mb-6">Create New Event</h1>
 
         <form @submit.prevent="submitForm" class="space-y-6">
           <!-- Event Details -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="md:col-span-2">
-              <label class="block text-xs font-medium text-slate-400 mb-1">Event Title</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Event Title</label>
               <input
                 v-model="form.title"
                 @input="generateSlug"
                 type="text"
                 placeholder="e.g. Annual Nursing & Clinical Excellence Gala"
                 required
-                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">URL Slug</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">URL Slug</label>
               <input
                 v-model="form.slug"
                 type="text"
                 placeholder="nursing-gala-2026"
                 required
-                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Venue / Location</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Venue / Location</label>
               <input
                 v-model="form.location"
                 type="text"
                 placeholder="Main Campus Auditorium"
                 required
-                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Start Date & Time</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Start Date & Time</label>
               <input
                 v-model="form.startDate"
                 type="datetime-local"
                 required
-                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">End Date & Time</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">End Date & Time</label>
               <input
                 v-model="form.endDate"
                 type="datetime-local"
                 required
-                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
               />
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-xs font-medium text-slate-400 mb-1">Event Description</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Event Description</label>
               <textarea
                 v-model="form.description"
                 rows="4"
                 placeholder="Provide details about schedule, dress code, and highlights..."
                 required
-                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
               ></textarea>
             </div>
 
             <!-- Banner Image Upload -->
             <div class="md:col-span-2">
-              <label class="block text-xs font-medium text-slate-400 mb-1">Event Cover Banner (Cloudinary Upload)</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Event Cover Banner (Cloudinary Upload)</label>
               <input
                 type="file"
                 accept="image/*"
                 @change="handleFileSelect"
-                class="w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+                class="w-full text-xs text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-indigo-500 cursor-pointer"
               />
             </div>
           </div>
 
           <!-- Ticket Tiers Builder -->
-          <div class="pt-6 border-t border-slate-800">
+          <div class="pt-6 border-t border-gray-200">
             <div class="flex items-center justify-between mb-4">
               <div>
-                <h3 class="text-lg font-bold text-white">Ticket Tiers & Pricing</h3>
-                <p class="text-xs text-slate-400">Add tickets like VIP, Regular, or Student Passes.</p>
+                <h3 class="text-lg font-bold text-gray-900">Ticket Tiers & Pricing</h3>
+                <p class="text-xs text-gray-600">Add tickets like VIP, Regular, or Student Passes.</p>
               </div>
-              <button type="button" @click="addTier" class="text-xs font-bold text-indigo-400 hover:text-indigo-300">
+              <button type="button" @click="addTier" class="text-xs font-bold text-primary hover:text-primary">
                 + Add Ticket Tier
               </button>
             </div>
@@ -110,40 +110,40 @@
               <div
                 v-for="(tier, index) in form.tiers"
                 :key="index"
-                class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center"
+                class="p-4 rounded-xl /60 border border-gray-200 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center"
               >
                 <div>
-                  <label class="block text-[11px] text-slate-500 mb-1">Tier Name</label>
+                  <label class="block text-[11px] text-gray-500 mb-1">Tier Name</label>
                   <input
                     v-model="tier.name"
                     type="text"
                     placeholder="VIP / Standard"
                     required
-                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white"
+                    class="w-full  border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-[11px] text-slate-500 mb-1">Price (₦)</label>
+                  <label class="block text-[11px] text-gray-500 mb-1">Price (₦)</label>
                   <input
                     v-model.number="tier.price"
                     type="number"
                     min="0"
                     placeholder="2500"
                     required
-                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white"
+                    class="w-full  border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-[11px] text-slate-500 mb-1">Capacity</label>
+                  <label class="block text-[11px] text-gray-500 mb-1">Capacity</label>
                   <input
                     v-model.number="tier.capacity"
                     type="number"
                     min="1"
                     placeholder="100"
                     required
-                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white"
+                    class="w-full  border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900"
                   />
                 </div>
 
@@ -229,7 +229,7 @@ function removeTier(idx) {
 }
 
 async function submitForm() {
-  const token = localStorage.getItem('cmt_token');
+  const token = localStorage.getItem('ticketr_admin_token');
   if (!token) {
     useRouter().push('/login');
     return;

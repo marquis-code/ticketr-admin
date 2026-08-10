@@ -29,24 +29,47 @@
 
       <div class="glass-card rounded-2xl p-8 border-primary/30">
         <form @submit.prevent="saveSettings" class="space-y-6">
-          <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Organization Name</label>
-            <input
-              v-model="form.name"
-              type="text"
-              required
-              class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500"
-            />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Organization Name</label>
+              <input
+                v-model="form.name"
+                type="text"
+                required
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Subdomain (Slug)</label>
+              <input
+                v-model="form.slug"
+                type="text"
+                required
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500"
+              />
+              <span class="text-[11px] text-gray-500 block mt-1">Updates live URL (e.g. {{ form.slug || 'slug' }}.ticketr.org)</span>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Contact Email</label>
-            <input
-              v-model="form.contactEmail"
-              type="email"
-              required
-              class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500"
-            />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Contact Email</label>
+              <input
+                v-model="form.contactEmail"
+                type="email"
+                required
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Signatory Emails for Orders (Comma separated)</label>
+              <input
+                v-model="form.notificationEmailsStr"
+                type="text"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500"
+                placeholder="admin@example.com, finance@example.com"
+              />
+            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -67,15 +90,32 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Paystack Subaccount Code (Split Payouts)</label>
-            <input
-              v-model="form.paystackSubaccountCode"
-              type="text"
-              placeholder="ACCT_xxxxxx"
-              class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 font-mono focus:outline-none focus:border-indigo-500"
-            />
-            <span class="text-[11px] text-gray-500 block mt-1">Ticket sales revenue will automatically split & deposit to this subaccount.</span>
+          <div class="pt-6 border-t border-gray-200">
+            <h2 class="text-sm font-bold text-gray-900 mb-4">Remittance Account Details</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Bank Name</label>
+                <input v-model="form.bankName" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Account Number</label>
+                <input v-model="form.accountNumber" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Account Name</label>
+              <input v-model="form.accountName" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Paystack Subaccount Code (Split Payouts)</label>
+              <input
+                v-model="form.paystackSubaccountCode"
+                type="text"
+                placeholder="ACCT_xxxxxx"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 font-mono focus:outline-none focus:border-indigo-500"
+              />
+              <span class="text-[11px] text-gray-500 block mt-1">Ticket sales revenue will automatically split & deposit to this subaccount.</span>
+            </div>
           </div>
 
           <div class="pt-4 flex justify-end">
@@ -98,10 +138,15 @@ const saving = ref(false);
 const tenantId = ref('');
 const form = ref({
   name: '',
+  slug: '',
   contactEmail: '',
+  notificationEmailsStr: '',
   primaryColor: '#4f46e5',
   secondaryColor: '#0f172a',
   paystackSubaccountCode: '',
+  bankName: '',
+  accountNumber: '',
+  accountName: '',
 });
 
 async function loadTenantSettings() {
@@ -119,10 +164,15 @@ async function loadTenantSettings() {
       const data = await res.json();
       if (data.tenant) {
         form.value.name = data.tenant.name || '';
+        form.value.slug = data.tenant.slug || '';
         form.value.contactEmail = data.tenant.contactEmail || '';
+        form.value.notificationEmailsStr = (data.tenant.notificationEmails || []).join(', ');
         form.value.primaryColor = data.tenant.primaryColor || '#4f46e5';
         form.value.secondaryColor = data.tenant.secondaryColor || '#0f172a';
         form.value.paystackSubaccountCode = data.tenant.paystackSubaccountCode || '';
+        form.value.bankName = data.tenant.bankName || '';
+        form.value.accountNumber = data.tenant.accountNumber || '';
+        form.value.accountName = data.tenant.accountName || '';
       }
     }
   } catch (err) {
@@ -136,13 +186,20 @@ async function saveSettings() {
 
   saving.value = true;
   try {
+    const payload = { ...form.value };
+    payload.notificationEmails = payload.notificationEmailsStr
+      .split(',')
+      .map(e => e.trim())
+      .filter(e => e.length > 0);
+    delete payload.notificationEmailsStr;
+
     const res = await fetch(`${config.public.apiBase}/tenants/${tenantId.value}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(form.value),
+      body: JSON.stringify(payload),
     });
     if (res.ok) {
       alert('Settings saved successfully!');

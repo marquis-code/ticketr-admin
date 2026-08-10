@@ -42,7 +42,7 @@
       </div>
 
       <!-- Table -->
-      <div class="glass-card rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div v-if="loading" class="text-center py-12 text-gray-500 text-sm">
           Loading attendees...
         </div>
@@ -52,24 +52,24 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-gray-700">
-            <thead class="/60 text-xs uppercase text-gray-600 border-b border-gray-200">
+          <table class="w-full text-left border-collapse whitespace-nowrap">
+            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
               <tr>
-                <th class="py-3 px-4">Ticket #</th>
-                <th class="py-3 px-4">Attendee Name</th>
-                <th class="py-3 px-4">Email</th>
-                <th class="py-3 px-4">Tier</th>
-                <th class="py-3 px-4">Check-in Status</th>
-                <th class="py-3 px-4 text-right">Action</th>
+                <th class="px-6 py-4">Ticket #</th>
+                <th class="px-6 py-4">Attendee Name</th>
+                <th class="px-6 py-4">Email</th>
+                <th class="px-6 py-4">Tier</th>
+                <th class="px-6 py-4">Check-in Status</th>
+                <th class="px-6 py-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800/60">
-              <tr v-for="att in filteredAttendees" :key="att._id" class="hover:/40 transition">
-                <td class="py-4 px-4 font-mono text-xs text-primary">{{ att.ticketNumber }}</td>
-                <td class="py-4 px-4 font-semibold text-gray-900">{{ att.attendeeName }}</td>
-                <td class="py-4 px-4 text-xs text-gray-600">{{ att.attendeeEmail }}</td>
-                <td class="py-4 px-4 text-xs text-gray-700">{{ att.tierId?.name || 'Standard' }}</td>
-                <td class="py-4 px-4">
+            <tbody class="divide-y divide-gray-100 bg-white">
+              <tr v-for="att in filteredAttendees" :key="att._id" class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 font-mono text-xs text-primary">{{ att.ticketNumber }}</td>
+                <td class="px-6 py-4 font-semibold text-gray-900">{{ att.attendeeName }}</td>
+                <td class="px-6 py-4 text-xs text-gray-600">{{ att.attendeeEmail }}</td>
+                <td class="px-6 py-4 text-xs text-gray-700">{{ att.tierId?.name || 'Standard' }}</td>
+                <td class="px-6 py-4">
                   <span
                     :class="att.status === 'CHECKED_IN' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'"
                     class="px-2.5 py-1 rounded-full text-[11px] font-semibold border"
@@ -77,7 +77,7 @@
                     {{ att.status }}
                   </span>
                 </td>
-                <td class="py-4 px-4 text-right">
+                <td class="px-6 py-4 text-right">
                   <button
                     @click="manualCheckIn(att)"
                     :disabled="att.status === 'CHECKED_IN'"

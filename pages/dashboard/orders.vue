@@ -29,7 +29,7 @@
       </div>
 
       <!-- Orders Table -->
-      <div class="glass-card rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div v-if="loading" class="text-center py-12 text-gray-500 text-sm">
           Loading orders...
         </div>
@@ -39,8 +39,8 @@
         </div>
 
         <div v-else class="overflow-hidden border border-gray-200 rounded-xl bg-white shadow-sm">
-          <table class="w-full text-left text-sm text-gray-700">
-            <thead class="bg-gray-50/80 text-[10px] font-bold uppercase text-gray-500 tracking-wider border-b border-gray-200">
+          <table class="w-full text-left border-collapse whitespace-nowrap">
+            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
               <tr>
                 <th class="py-4 px-4 md:px-6">Customer & Order</th>
                 <th class="py-4 px-4 md:px-6">Event</th>
@@ -49,9 +49,9 @@
                 <th class="py-4 px-4 md:px-6 text-right">Status</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr v-for="o in orders" :key="o._id" class="hover:bg-gray-50/50 transition-colors group">
-                <td class="py-4 px-4 md:px-6">
+            <tbody class="divide-y divide-gray-100 bg-white">
+              <tr v-for="o in orders" :key="o._id" class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 md:px-6">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
                       {{ o.customerName.charAt(0).toUpperCase() }}
@@ -65,22 +65,22 @@
                     </div>
                   </div>
                 </td>
-                <td class="py-4 px-4 md:px-6">
+                <td class="px-6 py-4 md:px-6">
                   <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 border border-gray-100 text-xs font-medium text-gray-700">
                     🎪 {{ o.eventId?.title || 'Unknown Event' }}
                   </div>
                 </td>
-                <td class="py-4 px-4 md:px-6">
+                <td class="px-6 py-4 md:px-6">
                   <span class="font-extrabold text-gray-900 text-sm">₦{{ o.totalAmount?.toLocaleString() }}</span>
                 </td>
-                <td class="py-4 px-4 md:px-6">
+                <td class="px-6 py-4 md:px-6">
                   <div class="flex items-center gap-2">
                     <span class="font-mono text-[11px] text-gray-500 truncate max-w-[120px]" :title="o.paystackReference">
                       {{ o.paystackReference }}
                     </span>
                   </div>
                 </td>
-                <td class="py-4 px-4 md:px-6 text-right">
+                <td class="px-6 py-4 md:px-6 text-right">
                   <span
                     :class="o.status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border shadow-sm"

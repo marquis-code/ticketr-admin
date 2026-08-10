@@ -77,7 +77,7 @@
       </div>
 
       <!-- Events List Table / Cards -->
-      <div class="glass-card rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-bold text-gray-900">My Events</h2>
           <NuxtLink to="/dashboard/events/create" class="text-xs font-semibold text-primary hover:text-primary">
@@ -90,37 +90,37 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-gray-700">
-            <thead class="/60 text-xs uppercase text-gray-600 border-b border-gray-200">
+          <table class="w-full text-left border-collapse whitespace-nowrap">
+            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
               <tr>
-                <th class="py-3 px-4">Event Title</th>
-                <th class="py-3 px-4">Date</th>
-                <th class="py-3 px-4">Location</th>
-                <th class="py-3 px-4">Tickets Sold</th>
-                <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4 text-right">Roster</th>
+                <th class="px-6 py-4">Event Title</th>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Location</th>
+                <th class="px-6 py-4">Tickets Sold</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4 text-right">Roster</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800/60">
-              <tr v-for="ev in events" :key="ev._id" class="hover:/40 transition">
-                <td class="py-4 px-4 font-semibold text-gray-900">
+            <tbody class="divide-y divide-gray-100 bg-white">
+              <tr v-for="ev in events" :key="ev._id" class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 font-semibold text-gray-900">
                   {{ ev.title }}
                 </td>
-                <td class="py-4 px-4 text-xs text-gray-600">
+                <td class="px-6 py-4 text-xs text-gray-600">
                   {{ new Date(ev.startDate).toLocaleDateString() }}
                 </td>
-                <td class="py-4 px-4 text-xs text-gray-600">
+                <td class="px-6 py-4 text-xs text-gray-600">
                   {{ ev.location }}
                 </td>
-                <td class="py-4 px-4 font-semibold text-primary">
+                <td class="px-6 py-4 font-semibold text-primary">
                   {{ ev.totalSold || 0 }} / {{ ev.totalCapacity || 0 }}
                 </td>
-                <td class="py-4 px-4">
+                <td class="px-6 py-4">
                   <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     {{ ev.status }}
                   </span>
                 </td>
-                <td class="py-4 px-4 text-right">
+                <td class="px-6 py-4 text-right">
                   <NuxtLink :to="`/dashboard/events/${ev._id}/attendees`" class="btn-secondary text-xs !py-1 !px-3 flex items-center gap-1 justify-end">
                     Attendees <ClipboardList class="w-3 h-3" />
                   </NuxtLink>

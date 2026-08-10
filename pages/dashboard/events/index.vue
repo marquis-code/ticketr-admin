@@ -60,7 +60,7 @@
         <div v-for="ev in filteredEvents" :key="ev._id" class="glass-card rounded-2xl overflow-hidden flex flex-col border-gray-200">
           <div class="relative h-40 ">
             <img
-              :src="ev.bannerUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80'"
+              :src="ev.carouselImages && ev.carouselImages.length ? ev.carouselImages[0] : ev.bannerUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80'"
               :alt="ev.title"
               class="w-full h-full object-cover"
             />
@@ -85,9 +85,9 @@
               <NuxtLink :to="`/dashboard/events/${ev._id}/attendees`" class="btn-secondary text-[11px] !py-2 text-center block">
                 📋 Attendee Roster
               </NuxtLink>
-              <button @click="triggerImageUpload(ev._id)" class="text-[11px] text-primary hover:bg-primary/10 border border-primary/30 font-semibold py-2 rounded-xl transition">
-                🖼 Edit Image
-              </button>
+              <NuxtLink :to="`/dashboard/events/${ev._id}/edit`" class="text-[11px] text-center text-primary hover:bg-primary/10 border border-primary/30 font-semibold py-2 rounded-xl transition">
+                ✏️ Edit Event
+              </NuxtLink>
               <button @click="deleteEvent(ev._id)" class="col-span-2 text-[11px] text-rose-400 hover:bg-rose-500/10 border border-rose-500/30 font-semibold py-2 rounded-xl transition">
                 🗑 Delete Event
               </button>

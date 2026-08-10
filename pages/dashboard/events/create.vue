@@ -82,15 +82,26 @@
               ></textarea>
             </div>
 
-            <!-- Banner Image Upload -->
+            <!-- Carousel Gallery Selection -->
             <div class="md:col-span-2">
-              <label class="block text-xs font-medium text-gray-600 mb-1">Event Cover Banner (Cloudinary Upload)</label>
-              <input
-                type="file"
-                accept="image/*"
-                @change="handleFileSelect"
-                class="w-full text-xs text-gray-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-indigo-500 cursor-pointer"
-              />
+              <label class="block text-xs font-medium text-gray-600 mb-2">Cover / Carousel Images (Select multiple)</label>
+              <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                <div
+                  v-for="(url, i) in galleryOptions"
+                  :key="i"
+                  @click="toggleCarouselImage(url)"
+                  :class="[
+                    'relative rounded-lg overflow-hidden border-2 cursor-pointer transition aspect-video',
+                    form.carouselImages.includes(url) ? 'border-primary' : 'border-transparent hover:border-gray-300'
+                  ]"
+                >
+                  <img :src="url" class="w-full h-full object-cover" />
+                  <div v-if="form.carouselImages.includes(url)" class="absolute top-1 right-1 bg-primary text-white rounded-full p-0.5">
+                    <Check class="w-3 h-3" />
+                  </div>
+                </div>
+              </div>
+              <p class="text-[10px] text-gray-400 mt-2">Select one image for a static banner, or multiple for a carousel header.</p>
             </div>
           </div>
 
@@ -191,7 +202,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Send } from 'lucide-vue-next';
+import { Send, Check } from 'lucide-vue-next';
 
 const config = useRuntimeConfig();
 
@@ -206,10 +217,38 @@ const form = ref({
   startDate: '',
   endDate: '',
   description: '',
+  carouselImages: [],
   tiers: [
     { name: 'Standard Ticket', price: 2500, capacity: 100, maxPerPurchase: 700 },
   ],
 });
+
+const galleryOptions = [
+  "https://res.cloudinary.com/marquis/image/upload/v1786363972/ticketr/gallery/zuyju8e1lkqpeqdrngjk.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786363975/ticketr/gallery/pkyy7pq5hvclifbtp3y6.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786363981/ticketr/gallery/kkwastlxnxg0vk9ayeyk.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786363984/ticketr/gallery/rgw9y0reyvfglxji5sp9.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786363987/ticketr/gallery/qye7zi8pxmedxunhqpbe.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364008/ticketr/gallery/jgpqiq15mvsyzgdveggg.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364032/ticketr/gallery/rfuf483exlldszlsyrjd.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364035/ticketr/gallery/sx8bgrpgl9nbogpj0kgy.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364046/ticketr/gallery/wpvrm8ti8emamcuk2dml.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364049/ticketr/gallery/vmte98lxfd29xpcomsba.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364051/ticketr/gallery/l33vv0u4raeqjbpphby3.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364055/ticketr/gallery/gedlh0l03g0pkc8s6unx.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364057/ticketr/gallery/qtwkfzvwjmzaoomebkbg.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364060/ticketr/gallery/mecwrzea3uwxofbmbnks.jpg",
+  "https://res.cloudinary.com/marquis/image/upload/v1786364069/ticketr/gallery/fx3yh17e3r8fchtzmpb8.jpg"
+];
+
+function toggleCarouselImage(url) {
+  const idx = form.value.carouselImages.indexOf(url);
+  if (idx > -1) {
+    form.value.carouselImages.splice(idx, 1);
+  } else {
+    form.value.carouselImages.push(url);
+  }
+}
 
 function generateSlug() {
   if (form.value.title) {
@@ -221,11 +260,7 @@ function generateSlug() {
   }
 }
 
-function handleFileSelect(e) {
-  if (e.target.files && e.target.files[0]) {
-    bannerFile.value = e.target.files[0];
-  }
-}
+
 
 function addTier() {
   form.value.tiers.push({
@@ -260,11 +295,8 @@ async function submitForm() {
     formData.append('startDate', form.value.startDate);
     formData.append('endDate', form.value.endDate);
     formData.append('description', form.value.description);
+    formData.append('carouselImages', JSON.stringify(form.value.carouselImages));
     formData.append('tiers', JSON.stringify(form.value.tiers));
-
-    if (bannerFile.value) {
-      formData.append('banner', bannerFile.value);
-    }
 
     const res = await fetch(`${config.public.apiBase}/events`, {
       method: 'POST',

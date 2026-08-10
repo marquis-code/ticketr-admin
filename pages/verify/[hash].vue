@@ -8,10 +8,10 @@
         <p class="text-sm text-gray-600 mt-2">Checking validity and logging entry...</p>
       </div>
 
-      <!-- Result state -->
       <div v-else-if="scanResult" class="glass-card rounded-2xl p-8 shadow-lg text-center" :class="scanResult.valid ? 'border-emerald-500/50' : 'border-rose-500/50'">
         <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner" :class="scanResult.valid ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
-          {{ scanResult.valid ? '✅' : '❌' }}
+          <CheckCircle v-if="scanResult.valid" class="w-10 h-10" />
+          <XCircle v-else class="w-10 h-10" />
         </div>
         
         <h2 class="text-2xl font-extrabold text-gray-900 mb-2">{{ scanResult.valid ? 'Access Granted' : 'Access Denied' }}</h2>
@@ -42,6 +42,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { CheckCircle, XCircle } from 'lucide-vue-next';
 
 const config = useRuntimeConfig();
 const route = useRoute();

@@ -179,7 +179,8 @@
 
           <div class="pt-4 flex justify-end">
             <button type="submit" :disabled="submitting" class="btn-primary py-3 px-8 text-sm">
-              {{ submitting ? 'Publishing Event...' : '🚀 Publish Event' }}
+              <Send v-if="!submitting" class="w-4 h-4" />
+              <span>{{ submitting ? 'Publishing Event...' : 'Publish Event' }}</span>
             </button>
           </div>
         </form>
@@ -190,6 +191,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { Send } from 'lucide-vue-next';
 
 const config = useRuntimeConfig();
 

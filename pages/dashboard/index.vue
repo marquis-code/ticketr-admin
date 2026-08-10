@@ -6,7 +6,7 @@
         <div class="flex items-center space-x-6">
           <NuxtLink to="/dashboard" class="flex items-center space-x-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center font-bold text-xl text-gray-900">
-              ⚡
+              <Zap class="w-6 h-6 text-gray-900" />
             </div>
             <div>
               <span class="font-bold text-lg text-gray-900 block">Organizer Dashboard</span>
@@ -29,7 +29,8 @@
             <span>+ Create Event</span>
           </NuxtLink>
           <NuxtLink to="/dashboard/scanner" class="btn-secondary text-xs !py-2 !px-3.5 flex items-center gap-1 border-primary/30 text-primary">
-            <span>🔍 Gate Scanner</span>
+            <Search class="w-4 h-4" />
+            <span>Gate Scanner</span>
           </NuxtLink>
           <button @click="logout" class="text-xs text-gray-600 hover:text-gray-900 px-3 py-2">
             Logout
@@ -120,8 +121,8 @@
                   </span>
                 </td>
                 <td class="py-4 px-4 text-right">
-                  <NuxtLink :to="`/dashboard/events/${ev._id}/attendees`" class="btn-secondary text-xs !py-1 !px-3">
-                    Attendees 📋
+                  <NuxtLink :to="`/dashboard/events/${ev._id}/attendees`" class="btn-secondary text-xs !py-1 !px-3 flex items-center gap-1 justify-end">
+                    Attendees <ClipboardList class="w-3 h-3" />
                   </NuxtLink>
                 </td>
               </tr>
@@ -135,6 +136,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { Zap, Search, ClipboardList } from 'lucide-vue-next';
 
 const config = useRuntimeConfig();
 const user = ref(null);

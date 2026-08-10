@@ -15,8 +15,8 @@
 
     <main class="max-w-xl mx-auto px-6 py-12 flex-grow w-full space-y-6">
       <div class="glass-card rounded-2xl p-8 border-primary/30 text-center">
-        <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
-          🔍
+        <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Search class="w-8 h-8" />
         </div>
         <h1 class="text-2xl font-extrabold text-gray-900 mb-2">Gate Entry Scanner</h1>
         <p class="text-xs text-gray-600 mb-6">Scan QR code or paste HMAC hash token from attendee's e-ticket.</p>
@@ -43,7 +43,9 @@
       <div v-if="scanResult" class="glass-card rounded-2xl p-6 transition-all border-2" :class="scanResult.valid ? 'border-emerald-500/80 bg-emerald-950/20' : (scanResult.alreadyCheckedIn ? 'border-amber-500/80 bg-amber-950/20' : 'border-rose-500/80 bg-rose-950/20')">
         <div class="flex items-start gap-4">
           <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold" :class="scanResult.valid ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'">
-            {{ scanResult.valid ? '✅' : (scanResult.alreadyCheckedIn ? '⚠️' : '❌') }}
+            <CheckCircle v-if="scanResult.valid" class="w-6 h-6" />
+            <AlertTriangle v-else-if="scanResult.alreadyCheckedIn" class="w-6 h-6" />
+            <XCircle v-else class="w-6 h-6" />
           </div>
 
           <div class="flex-grow space-y-1">
@@ -68,6 +70,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { Search, CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next';
 
 const config = useRuntimeConfig();
 

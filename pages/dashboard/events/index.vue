@@ -72,7 +72,7 @@
           </div>
 
           <div class="p-6 flex flex-col flex-grow">
-            <span class="text-xs text-primary font-semibold mb-1">📅 {{ new Date(ev.startDate).toLocaleDateString() }}</span>
+            <span class="text-xs text-primary font-semibold mb-1 flex items-center gap-1"><Calendar class="w-3 h-3" /> {{ new Date(ev.startDate).toLocaleDateString() }}</span>
             <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-1">{{ ev.title }}</h3>
             <p class="text-xs text-gray-600 line-clamp-2 mb-4">{{ ev.description }}</p>
 
@@ -102,6 +102,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { Calendar } from 'lucide-vue-next';
 
 const config = useRuntimeConfig();
 

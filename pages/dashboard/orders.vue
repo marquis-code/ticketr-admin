@@ -1,14 +1,14 @@
 <template>
   <div class="min-h-screen   flex flex-col">
-    <!-- Top Header -->
     <header class="glass-card border-b border-gray-200 px-6 py-4">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-6">
           <NuxtLink to="/" class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center font-bold text-lg text-gray-900">
+            <img v-if="tenantLogo" :src="tenantLogo" alt="Logo" class="w-9 h-9 rounded-xl object-cover border border-gray-200" />
+            <div v-else class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center font-bold text-lg text-gray-900">
               ⚡
             </div>
-            <span class="font-bold text-lg text-gray-900">Ticketr Admin</span>
+            <span class="font-bold text-lg text-gray-900">{{ tenantName || 'Ticketr Admin' }}</span>
           </NuxtLink>
 
           <nav class="hidden md:flex items-center space-x-4 text-xs font-semibold">
@@ -38,33 +38,54 @@
           No orders placed yet.
         </div>
 
-        <div v-else class="overflow-x-auto">
+        <div v-else class="overflow-hidden border border-gray-200 rounded-xl bg-white shadow-sm">
           <table class="w-full text-left text-sm text-gray-700">
-            <thead class="/60 text-xs uppercase text-gray-600 border-b border-gray-200">
+            <thead class="bg-gray-50/80 text-[10px] font-bold uppercase text-gray-500 tracking-wider border-b border-gray-200">
               <tr>
-                <th class="py-3 px-4">Order Number</th>
-                <th class="py-3 px-4">Customer Name</th>
-                <th class="py-3 px-4">Event</th>
-                <th class="py-3 px-4">Amount</th>
-                <th class="py-3 px-4">Paystack Ref</th>
-                <th class="py-3 px-4">Status</th>
+                <th class="py-4 px-6">Customer & Order</th>
+                <th class="py-4 px-6">Event</th>
+                <th class="py-4 px-6">Amount</th>
+                <th class="py-4 px-6">Reference</th>
+                <th class="py-4 px-6 text-right">Status</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800/60">
-              <tr v-for="o in orders" :key="o._id" class="hover:/40 transition">
-                <td class="py-4 px-4 font-mono text-xs text-primary">{{ o.orderNumber }}</td>
-                <td class="py-4 px-4 font-semibold text-gray-900">
-                  {{ o.customerName }}
-                  <span class="block text-xs text-gray-500 font-normal">{{ o.customerEmail }}</span>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="o in orders" :key="o._id" class="hover:bg-gray-50/50 transition-colors group">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                      {{ o.customerName.charAt(0).toUpperCase() }}
+                    </div>
+                    <div>
+                      <p class="font-bold text-gray-900 text-sm">{{ o.customerName }}</p>
+                      <p class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                        <span class="font-mono text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{{ o.orderNumber }}</span>
+                        {{ o.customerEmail }}
+                      </p>
+                    </div>
+                  </div>
                 </td>
-                <td class="py-4 px-4 text-xs text-gray-700">{{ o.eventId?.title || 'Event' }}</td>
-                <td class="py-4 px-4 font-extrabold text-gray-900">₦{{ o.totalAmount?.toLocaleString() }}</td>
-                <td class="py-4 px-4 font-mono text-xs text-gray-600">{{ o.paystackReference }}</td>
-                <td class="py-4 px-4">
+                <td class="py-4 px-6">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 border border-gray-100 text-xs font-medium text-gray-700">
+                    🎪 {{ o.eventId?.title || 'Unknown Event' }}
+                  </div>
+                </td>
+                <td class="py-4 px-6">
+                  <span class="font-extrabold text-gray-900 text-sm">₦{{ o.totalAmount?.toLocaleString() }}</span>
+                </td>
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono text-[11px] text-gray-500 truncate max-w-[120px]" :title="o.paystackReference">
+                      {{ o.paystackReference }}
+                    </span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-right">
                   <span
-                    :class="o.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'"
-                    class="px-2.5 py-1 rounded-full text-[11px] font-semibold border"
+                    :class="o.status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border shadow-sm"
                   >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="o.status === 'PAID' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
                     {{ o.status }}
                   </span>
                 </td>
@@ -84,6 +105,27 @@ const config = useRuntimeConfig();
 
 const orders = ref([]);
 const loading = ref(true);
+const tenantLogo = ref('');
+const tenantName = ref('');
+
+async function loadTenantDetails() {
+  const token = localStorage.getItem('ticketr_admin_token');
+  if (!token) return;
+  try {
+    const res = await fetch(`${config.public.apiBase}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.tenant) {
+        tenantLogo.value = data.tenant.logoUrl;
+        tenantName.value = data.tenant.name;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 async function loadOrders() {
   const token = localStorage.getItem('ticketr_admin_token');
@@ -105,6 +147,7 @@ async function loadOrders() {
 }
 
 onMounted(() => {
+  loadTenantDetails();
   loadOrders();
 });
 </script>

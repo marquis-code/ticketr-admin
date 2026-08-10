@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Navbar -->
-    <header class="glass-card border-b border-gray-200/80 px-6 py-4">
-      <div class="max-w-4xl mx-auto flex items-center justify-between">
+    <header class="glass-card border-b border-gray-200/80 px-4 md:px-6 py-4">
+      <div class="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
         <NuxtLink to="/dashboard/events" class="text-sm font-semibold text-gray-600 hover:text-gray-900 transition flex items-center gap-1">
           <ArrowLeft class="w-4 h-4" /> Back to Events
         </NuxtLink>
@@ -10,7 +10,7 @@
       </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-6 py-8 flex-grow w-full">
+    <main class="max-w-4xl mx-auto px-4 md:px-6 py-8 flex-grow w-full">
       <div v-if="loading" class="flex justify-center items-center py-20">
         <Loader2 class="w-8 h-8 animate-spin text-primary" />
       </div>
@@ -103,7 +103,7 @@
           </div>
 
           <div class="pt-4 flex justify-end">
-            <button type="submit" :disabled="submittingDetails" class="btn-primary py-2 px-6 text-sm">
+            <button type="submit" :disabled="submittingDetails" class="btn-primary py-2 px-4 md:px-6 text-sm">
               <Save v-if="!submittingDetails" class="w-4 h-4" />
               <Loader2 v-else class="w-4 h-4 animate-spin" />
               <span>{{ submittingDetails ? 'Saving...' : 'Save Details' }}</span>
@@ -179,8 +179,8 @@
             </div>
           </div>
           
-          <div v-if="editingTier" class="pt-2 border-t mt-4">
-            <label class="block text-[11px] font-medium text-gray-600 mb-1">Upload Ticket Banner</label>
+          <div class="pt-2 border-t mt-4">
+            <label class="block text-[11px] font-medium text-gray-600 mb-1">Upload Ticket Banner (Optional)</label>
             <input type="file" @change="handleTierBanner" accept="image/*" class="w-full text-xs" />
             <div v-if="tierForm.templateImageUrl" class="mt-2">
               <img :src="tierForm.templateImageUrl" class="h-16 rounded-md object-cover" />
@@ -408,6 +408,19 @@ async function saveTier() {
         })
       });
       if (!res.ok) throw new Error((await res.json()).message);
+      
+      const newTier = await res.json();
+      
+      if (tierBannerFile.value) {
+        const formData = new FormData();
+        formData.append('banner', tierBannerFile.value);
+        const bannerRes = await fetch(`${config.public.apiBase}/events/${eventId}/tiers/${newTier._id}/banner`, {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+        if (!bannerRes.ok) throw new Error('Failed to upload banner');
+      }
     }
 
     await fetchEvent();

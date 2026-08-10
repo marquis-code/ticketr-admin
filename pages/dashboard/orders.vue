@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen   flex flex-col">
-    <header class="glass-card border-b border-gray-200 px-6 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <div class="flex items-center space-x-6">
+    <header class="glass-card border-b border-gray-200 px-4 md:px-6 py-4">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 w-full md:w-auto">
           <NuxtLink to="/" class="flex items-center space-x-3">
             <img v-if="tenantLogo" :src="tenantLogo" alt="Logo" class="w-9 h-9 rounded-xl object-cover border border-gray-200" />
             <div v-else class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center font-bold text-lg text-gray-900">
@@ -11,7 +11,7 @@
             <span class="font-bold text-lg text-gray-900">{{ tenantName || 'Ticketr Admin' }}</span>
           </NuxtLink>
 
-          <nav class="hidden md:flex items-center space-x-4 text-xs font-semibold">
+          <nav class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide text-xs font-semibold">
             <NuxtLink to="/dashboard" class="text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg">Dashboard</NuxtLink>
             <NuxtLink to="/dashboard/events" class="text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg">Events Management</NuxtLink>
             <NuxtLink to="/dashboard/orders" class="bg-primary text-white px-3 py-1.5 rounded-lg">Orders & Financials</NuxtLink>
@@ -22,7 +22,7 @@
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-8 flex-grow w-full space-y-6">
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-8 flex-grow w-full space-y-6">
       <div>
         <h1 class="text-2xl font-extrabold text-gray-900">Orders & Financial Transactions</h1>
         <p class="text-xs text-gray-600 mt-1">Audit ticket purchases, Paystack transaction references, and revenue logs.</p>
@@ -42,16 +42,16 @@
           <table class="w-full text-left text-sm text-gray-700">
             <thead class="bg-gray-50/80 text-[10px] font-bold uppercase text-gray-500 tracking-wider border-b border-gray-200">
               <tr>
-                <th class="py-4 px-6">Customer & Order</th>
-                <th class="py-4 px-6">Event</th>
-                <th class="py-4 px-6">Amount</th>
-                <th class="py-4 px-6">Reference</th>
-                <th class="py-4 px-6 text-right">Status</th>
+                <th class="py-4 px-4 md:px-6">Customer & Order</th>
+                <th class="py-4 px-4 md:px-6">Event</th>
+                <th class="py-4 px-4 md:px-6">Amount</th>
+                <th class="py-4 px-4 md:px-6">Reference</th>
+                <th class="py-4 px-4 md:px-6 text-right">Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr v-for="o in orders" :key="o._id" class="hover:bg-gray-50/50 transition-colors group">
-                <td class="py-4 px-6">
+                <td class="py-4 px-4 md:px-6">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
                       {{ o.customerName.charAt(0).toUpperCase() }}
@@ -65,22 +65,22 @@
                     </div>
                   </div>
                 </td>
-                <td class="py-4 px-6">
+                <td class="py-4 px-4 md:px-6">
                   <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 border border-gray-100 text-xs font-medium text-gray-700">
                     🎪 {{ o.eventId?.title || 'Unknown Event' }}
                   </div>
                 </td>
-                <td class="py-4 px-6">
+                <td class="py-4 px-4 md:px-6">
                   <span class="font-extrabold text-gray-900 text-sm">₦{{ o.totalAmount?.toLocaleString() }}</span>
                 </td>
-                <td class="py-4 px-6">
+                <td class="py-4 px-4 md:px-6">
                   <div class="flex items-center gap-2">
                     <span class="font-mono text-[11px] text-gray-500 truncate max-w-[120px]" :title="o.paystackReference">
                       {{ o.paystackReference }}
                     </span>
                   </div>
                 </td>
-                <td class="py-4 px-6 text-right">
+                <td class="py-4 px-4 md:px-6 text-right">
                   <span
                     :class="o.status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border shadow-sm"

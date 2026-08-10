@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen   flex flex-col">
     <!-- Header -->
-    <header class="glass-card border-b border-gray-200 px-6 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <header class="glass-card border-b border-gray-200 px-4 md:px-6 py-4">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
         <NuxtLink to="/dashboard/events" class="text-xs font-semibold text-gray-600 hover:text-gray-900 transition">
           ← Back to Events
         </NuxtLink>
@@ -10,7 +10,7 @@
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-8 flex-grow w-full space-y-6">
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-8 flex-grow w-full space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-2xl font-extrabold text-gray-900">{{ eventInfo?.title || 'Event Roster' }}</h1>

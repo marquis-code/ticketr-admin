@@ -1,0 +1,99 @@
+<template>
+  <div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+    <div class="w-full max-w-md">
+      <!-- Verifying state -->
+      <div v-if="verifying" class="glass-card rounded-2xl p-12 text-center shadow-lg">
+        <div class="inline-block w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <h3 class="text-xl font-bold text-gray-900 mt-6">Verifying Ticket...</h3>
+        <p class="text-sm text-gray-600 mt-2">Checking validity and logging entry...</p>
+      </div>
+
+      <!-- Result state -->
+      <div v-else-if="scanResult" class="glass-card rounded-2xl p-8 shadow-lg text-center" :class="scanResult.valid ? 'border-emerald-500/50' : 'border-rose-500/50'">
+        <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner" :class="scanResult.valid ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
+          {{ scanResult.valid ? '✅' : '❌' }}
+        </div>
+        
+        <h2 class="text-2xl font-extrabold text-gray-900 mb-2">{{ scanResult.valid ? 'Access Granted' : 'Access Denied' }}</h2>
+        <p class="text-base text-gray-700 font-medium mb-6">{{ scanResult.message }}</p>
+
+        <div v-if="scanResult.attendeeName" class="bg-gray-50 rounded-xl p-4 text-left border border-gray-100 mb-6">
+          <p class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Attendee</p>
+          <p class="font-bold text-gray-900 text-lg">{{ scanResult.attendeeName }}</p>
+          
+          <div class="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Ticket Tier</p>
+              <p class="font-semibold text-gray-800 text-sm">{{ scanResult.tierName }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Ticket Number</p>
+              <p class="font-mono text-gray-800 text-xs mt-0.5 bg-gray-200 inline-block px-1.5 py-0.5 rounded">{{ scanResult.ticketNumber }}</p>
+            </div>
+          </div>
+        </div>
+
+        <button @click="goHome" class="btn-primary w-full py-3">Return to Dashboard</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const config = useRuntimeConfig();
+const route = useRoute();
+const router = useRouter();
+
+const verifying = ref(true);
+const scanResult = ref(null);
+
+async function verifyTicket() {
+  const hash = route.params.hash;
+  const token = localStorage.getItem('ticketr_admin_token');
+  
+  if (!token) {
+    alert('You must be logged in as an Admin to scan tickets. Redirecting to login...');
+    router.push(`/login?redirect=/verify/${hash}`);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${config.public.apiBase}/tickets/verify-scan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ qrCodeHash: hash }),
+    });
+
+    if (res.ok) {
+      scanResult.value = await res.json();
+    } else {
+      const err = await res.json();
+      scanResult.value = {
+        valid: false,
+        message: err.message || 'Invalid QR code or ticket scan failed',
+      };
+    }
+  } catch (err) {
+    scanResult.value = {
+      valid: false,
+      message: 'Network error verifying ticket',
+    };
+  } finally {
+    verifying.value = false;
+  }
+}
+
+function goHome() {
+  router.push('/dashboard/scanner');
+}
+
+onMounted(() => {
+  verifyTicket();
+});
+</script>

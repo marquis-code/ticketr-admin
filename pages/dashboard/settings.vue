@@ -62,13 +62,25 @@
               />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Signatory Emails for Orders (Comma separated)</label>
-              <input
-                v-model="form.notificationEmailsStr"
-                type="text"
-                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500"
-                placeholder="admin@example.com, finance@example.com"
-              />
+              <label class="block text-xs font-medium text-gray-600 mb-1">Signatory Emails for Orders</label>
+              <div class="flex gap-2 mb-2">
+                <input
+                  v-model="newEmail"
+                  type="email"
+                  class="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 bg-white"
+                  placeholder="admin@example.com"
+                  @keydown.enter.prevent="addEmail"
+                />
+                <button type="button" @click="addEmail" class="btn-secondary !py-2 !px-4 text-xs whitespace-nowrap bg-white border border-gray-200 hover:bg-gray-50">
+                  Add
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="(email, idx) in form.notificationEmails" :key="idx" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-100">
+                  {{ email }}
+                  <button type="button" @click="removeEmail(idx)" class="text-indigo-400 hover:text-indigo-600 focus:outline-none w-4 h-4 flex items-center justify-center font-bold text-sm leading-none">&times;</button>
+                </span>
+              </div>
             </div>
           </div>
 
@@ -171,11 +183,12 @@ const config = useRuntimeConfig();
 
 const saving = ref(false);
 const tenantId = ref('');
+const newEmail = ref('');
 const form = ref({
   name: '',
   slug: '',
   contactEmail: '',
-  notificationEmailsStr: '',
+  notificationEmails: [],
   primaryColor: '#4f46e5',
   secondaryColor: '#0f172a',
   paystackSubaccountCode: '',
@@ -189,6 +202,18 @@ const form = ref({
 
 const banks = ref([]);
 const verifying = ref({ primary: false, secondary: false });
+
+function addEmail() {
+  const email = newEmail.value.trim().toLowerCase();
+  if (email && !form.value.notificationEmails.includes(email) && email.includes('@')) {
+    form.value.notificationEmails.push(email);
+    newEmail.value = '';
+  }
+}
+
+function removeEmail(idx) {
+  form.value.notificationEmails.splice(idx, 1);
+}
 
 async function loadBanks() {
   const token = localStorage.getItem('ticketr_admin_token');
@@ -253,7 +278,7 @@ async function loadTenantSettings() {
         form.value.name = data.tenant.name || '';
         form.value.slug = data.tenant.slug || '';
         form.value.contactEmail = data.tenant.contactEmail || '';
-        form.value.notificationEmailsStr = (data.tenant.notificationEmails || []).join(', ');
+        form.value.notificationEmails = data.tenant.notificationEmails || [];
         form.value.primaryColor = data.tenant.primaryColor || '#4f46e5';
         form.value.secondaryColor = data.tenant.secondaryColor || '#0f172a';
         form.value.paystackSubaccountCode = data.tenant.paystackSubaccountCode || '';
@@ -278,11 +303,6 @@ async function saveSettings() {
   saving.value = true;
   try {
     const payload = { ...form.value };
-    payload.notificationEmails = payload.notificationEmailsStr
-      .split(',')
-      .map(e => e.trim())
-      .filter(e => e.length > 0);
-    delete payload.notificationEmailsStr;
 
     payload.primaryRemittanceAccount = form.value.primaryBankCode ? {
       bankCode: form.value.primaryBankCode,

@@ -147,6 +147,18 @@
                   />
                 </div>
 
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">Max Per Purchase</label>
+                  <input
+                    v-model.number="tier.maxPerPurchase"
+                    type="number"
+                    min="1"
+                    placeholder="700"
+                    required
+                    class="w-full  border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900"
+                  />
+                </div>
+
                 <div class="flex items-center justify-end pt-4 sm:pt-0">
                   <button
                     type="button"
@@ -193,7 +205,7 @@ const form = ref({
   endDate: '',
   description: '',
   tiers: [
-    { name: 'Standard Ticket', price: 2500, capacity: 100, maxPerPurchase: 5 },
+    { name: 'Standard Ticket', price: 2500, capacity: 100, maxPerPurchase: 700 },
   ],
 });
 
@@ -218,7 +230,7 @@ function addTier() {
     name: 'VIP Pass',
     price: 5000,
     capacity: 50,
-    maxPerPurchase: 2,
+    maxPerPurchase: 700,
   });
 }
 

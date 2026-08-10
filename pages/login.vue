@@ -79,13 +79,23 @@
 
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1.5">Password</label>
-          <input
-            v-model="form.password"
-            type="password"
-            placeholder="••••••••"
-            required
-            class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
-          />
+          <div class="relative">
+            <input
+              v-model="form.password"
+              :type="showPassword ? 'text' : 'password'"
+              placeholder="••••••••"
+              required
+              class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition pr-10"
+            />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              <Eye v-if="!showPassword" class="w-4 h-4" />
+              <EyeOff v-else class="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div v-if="errorMsg" class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs">
@@ -107,6 +117,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { Eye, EyeOff } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
 
@@ -115,6 +126,7 @@ const config = useRuntimeConfig();
 const isRegister = ref(false);
 const submitting = ref(false);
 const errorMsg = ref('');
+const showPassword = ref(false);
 
 const form = ref({
   name: '',

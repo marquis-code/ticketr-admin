@@ -40,6 +40,7 @@
 </template>
 
 <script setup>
+import { toast } from 'vue-sonner';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { CheckCircle, XCircle } from 'lucide-vue-next';
@@ -56,7 +57,7 @@ async function verifyTicket() {
   const token = localStorage.getItem('ticketr_admin_token');
   
   if (!token) {
-    alert('You must be logged in as an Admin to scan tickets. Redirecting to login...');
+    toast.error('You must be logged in as an Admin to scan tickets. Redirecting to login...');
     router.push(`/login?redirect=/verify/${hash}`);
     return;
   }

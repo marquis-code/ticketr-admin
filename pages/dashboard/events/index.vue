@@ -101,6 +101,7 @@
 </template>
 
 <script setup>
+import { toast } from 'vue-sonner';
 import { ref, computed, onMounted } from 'vue';
 import { Calendar } from 'lucide-vue-next';
 
@@ -178,15 +179,15 @@ async function handleImageUpload(e) {
     });
     
     if (res.ok) {
-      alert('Event image updated successfully!');
+      toast.success('Event image updated successfully!');
       await loadEvents();
     } else {
       const err = await res.json();
-      alert(err.message || 'Failed to update image');
+      toast.error(err.message || 'Failed to update image');
     }
   } catch (e) {
     console.error(e);
-    alert('Network error while updating image');
+    toast.error('Network error while updating image');
   } finally {
     // Reset file input
     e.target.value = null;

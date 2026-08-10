@@ -69,6 +69,7 @@
 </template>
 
 <script setup>
+import { toast } from 'vue-sonner';
 import { ref } from 'vue';
 import { Search, CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next';
 
@@ -81,7 +82,7 @@ const scanResult = ref(null);
 async function verifyTicketScan() {
   const token = localStorage.getItem('ticketr_admin_token');
   if (!token) {
-    alert('Please log in to use gate scanner.');
+    toast.success('Please log in to use gate scanner.');
     useRouter().push('/login');
     return;
   }

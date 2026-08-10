@@ -177,6 +177,7 @@
 </template>
 
 <script setup>
+import { toast } from 'vue-sonner';
 import { ref, onMounted } from 'vue';
 
 const config = useRuntimeConfig();
@@ -248,14 +249,14 @@ async function verifyAccount(type) {
       } else {
         form.value.secondaryAccountName = data.account_name;
       }
-      alert('Account verified successfully!');
+      toast.success('Account verified successfully!');
     } else {
-      alert(data.message || 'Failed to verify account number');
+      toast.error(data.message || 'Failed to verify account number');
       if (type === 'primary') form.value.primaryAccountName = '';
       else form.value.secondaryAccountName = '';
     }
   } catch (err) {
-    alert('Network error while verifying account');
+    toast.error('Network error while verifying account');
   } finally {
     verifying.value[type] = false;
   }
@@ -335,10 +336,10 @@ async function saveSettings() {
       body: JSON.stringify(payload),
     });
     if (res.ok) {
-      alert('Settings saved successfully!');
+      toast.success('Settings saved successfully!');
     }
   } catch (e) {
-    alert('Failed to save settings');
+    toast.error('Failed to save settings');
   } finally {
     saving.value = false;
   }

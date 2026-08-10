@@ -201,6 +201,7 @@
 </template>
 
 <script setup>
+import { toast } from 'vue-sonner';
 import { ref } from 'vue';
 import { Send, Check } from 'lucide-vue-next';
 
@@ -305,7 +306,7 @@ async function submitForm() {
     });
 
     if (res.ok) {
-      alert('Event published successfully!');
+      toast.success('Event published successfully!');
       useRouter().push('/dashboard/events');
     } else {
       const err = await res.json();

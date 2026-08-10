@@ -1,0 +1,274 @@
+<template>
+  <div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <!-- Navbar -->
+    <header class="glass-card border-b border-slate-800/80 px-6 py-4">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <NuxtLink to="/dashboard" class="text-sm font-semibold text-slate-400 hover:text-white transition">
+          ← Cancel & Back to Dashboard
+        </NuxtLink>
+        <span class="text-xs font-bold text-indigo-400">Event Creator Wizard</span>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-8 flex-grow w-full">
+      <div class="glass-card rounded-2xl p-8 border-indigo-500/30">
+        <h1 class="text-2xl font-extrabold text-white mb-6">Create New Event</h1>
+
+        <form @submit.prevent="submitForm" class="space-y-6">
+          <!-- Event Details -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-medium text-slate-400 mb-1">Event Title</label>
+              <input
+                v-model="form.title"
+                @input="generateSlug"
+                type="text"
+                placeholder="e.g. Annual Nursing & Clinical Excellence Gala"
+                required
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">URL Slug</label>
+              <input
+                v-model="form.slug"
+                type="text"
+                placeholder="nursing-gala-2026"
+                required
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Venue / Location</label>
+              <input
+                v-model="form.location"
+                type="text"
+                placeholder="Main Campus Auditorium"
+                required
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Start Date & Time</label>
+              <input
+                v-model="form.startDate"
+                type="datetime-local"
+                required
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">End Date & Time</label>
+              <input
+                v-model="form.endDate"
+                type="datetime-local"
+                required
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-xs font-medium text-slate-400 mb-1">Event Description</label>
+              <textarea
+                v-model="form.description"
+                rows="4"
+                placeholder="Provide details about schedule, dress code, and highlights..."
+                required
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+              ></textarea>
+            </div>
+
+            <!-- Banner Image Upload -->
+            <div class="md:col-span-2">
+              <label class="block text-xs font-medium text-slate-400 mb-1">Event Cover Banner (Cloudinary Upload)</label>
+              <input
+                type="file"
+                accept="image/*"
+                @change="handleFileSelect"
+                class="w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <!-- Ticket Tiers Builder -->
+          <div class="pt-6 border-t border-slate-800">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-white">Ticket Tiers & Pricing</h3>
+                <p class="text-xs text-slate-400">Add tickets like VIP, Regular, or Student Passes.</p>
+              </div>
+              <button type="button" @click="addTier" class="text-xs font-bold text-indigo-400 hover:text-indigo-300">
+                + Add Ticket Tier
+              </button>
+            </div>
+
+            <div class="space-y-4">
+              <div
+                v-for="(tier, index) in form.tiers"
+                :key="index"
+                class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center"
+              >
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">Tier Name</label>
+                  <input
+                    v-model="tier.name"
+                    type="text"
+                    placeholder="VIP / Standard"
+                    required
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">Price (₦)</label>
+                  <input
+                    v-model.number="tier.price"
+                    type="number"
+                    min="0"
+                    placeholder="2500"
+                    required
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">Capacity</label>
+                  <input
+                    v-model.number="tier.capacity"
+                    type="number"
+                    min="1"
+                    placeholder="100"
+                    required
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white"
+                  />
+                </div>
+
+                <div class="flex items-center justify-end pt-4 sm:pt-0">
+                  <button
+                    type="button"
+                    @click="removeTier(index)"
+                    :disabled="form.tiers.length === 1"
+                    class="text-xs text-rose-400 hover:text-rose-300 font-semibold disabled:opacity-30"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="errorMsg" class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+            {{ errorMsg }}
+          </div>
+
+          <div class="pt-4 flex justify-end">
+            <button type="submit" :disabled="submitting" class="btn-primary py-3 px-8 text-sm">
+              {{ submitting ? 'Publishing Event...' : '🚀 Publish Event' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const config = useRuntimeConfig();
+
+const submitting = ref(false);
+const errorMsg = ref('');
+const bannerFile = ref(null);
+
+const form = ref({
+  title: '',
+  slug: '',
+  location: '',
+  startDate: '',
+  endDate: '',
+  description: '',
+  tiers: [
+    { name: 'Standard Ticket', price: 2500, capacity: 100, maxPerPurchase: 5 },
+  ],
+});
+
+function generateSlug() {
+  if (form.value.title) {
+    form.value.slug = form.value.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
+  }
+}
+
+function handleFileSelect(e) {
+  if (e.target.files && e.target.files[0]) {
+    bannerFile.value = e.target.files[0];
+  }
+}
+
+function addTier() {
+  form.value.tiers.push({
+    name: 'VIP Pass',
+    price: 5000,
+    capacity: 50,
+    maxPerPurchase: 2,
+  });
+}
+
+function removeTier(idx) {
+  if (form.value.tiers.length > 1) {
+    form.value.tiers.splice(idx, 1);
+  }
+}
+
+async function submitForm() {
+  const token = localStorage.getItem('cmt_token');
+  if (!token) {
+    useRouter().push('/login');
+    return;
+  }
+
+  submitting.value = true;
+  errorMsg.value = '';
+
+  try {
+    const formData = new FormData();
+    formData.append('title', form.value.title);
+    formData.append('slug', form.value.slug);
+    formData.append('location', form.value.location);
+    formData.append('startDate', form.value.startDate);
+    formData.append('endDate', form.value.endDate);
+    formData.append('description', form.value.description);
+    formData.append('tiers', JSON.stringify(form.value.tiers));
+
+    if (bannerFile.value) {
+      formData.append('banner', bannerFile.value);
+    }
+
+    const res = await fetch(`${config.public.apiBase}/events`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (res.ok) {
+      alert('Event published successfully!');
+      useRouter().push('/dashboard/events');
+    } else {
+      const err = await res.json();
+      errorMsg.value = err.message || 'Failed to create event';
+    }
+  } catch (err) {
+    errorMsg.value = 'Network error while publishing event';
+  } finally {
+    submitting.value = false;
+  }
+}
+</script>

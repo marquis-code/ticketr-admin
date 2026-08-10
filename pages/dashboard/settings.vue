@@ -91,28 +91,63 @@
           </div>
 
           <div class="pt-6 border-t border-gray-200">
-            <h2 class="text-sm font-bold text-gray-900 mb-4">Remittance Account Details</h2>
+            <h2 class="text-sm font-bold text-gray-900 mb-1">Primary Remittance Account</h2>
+            <p class="text-xs text-gray-500 mb-4">Your main account for receiving ticket sales payouts.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Bank Name</label>
-                <input v-model="form.bankName" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+                <select v-model="form.primaryBankCode" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 bg-white">
+                  <option value="" disabled>Select Bank</option>
+                  <option v-for="bank in banks" :key="bank.code" :value="bank.code">{{ bank.name }}</option>
+                </select>
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Account Number</label>
-                <input v-model="form.accountNumber" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+                <div class="flex gap-2">
+                  <input v-model="form.primaryAccountNumber" type="text" placeholder="e.g. 0123456789" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+                  <button type="button" @click="verifyAccount('primary')" :disabled="!form.primaryBankCode || !form.primaryAccountNumber || verifying.primary" class="btn-secondary !py-2.5 !px-4 text-xs whitespace-nowrap">
+                    {{ verifying.primary ? 'Verifying...' : 'Verify' }}
+                  </button>
+                </div>
               </div>
             </div>
-            <div class="mb-4">
-              <label class="block text-xs font-medium text-gray-600 mb-1">Account Name</label>
-              <input v-model="form.accountName" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+            <div class="mb-6">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Account Name (Auto-verified)</label>
+              <input v-model="form.primaryAccountName" type="text" readonly class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-gray-50 focus:outline-none" placeholder="Verify account to auto-fill" />
             </div>
-            <div>
+
+            <h2 class="text-sm font-bold text-gray-900 mb-1 mt-6">Secondary Remittance Account <span class="text-gray-400 font-normal">(Optional)</span></h2>
+            <p class="text-xs text-gray-500 mb-4">A backup or alternative account for payouts.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Bank Name</label>
+                <select v-model="form.secondaryBankCode" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 bg-white">
+                  <option value="">Select Bank (Optional)</option>
+                  <option v-for="bank in banks" :key="bank.code" :value="bank.code">{{ bank.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Account Number</label>
+                <div class="flex gap-2">
+                  <input v-model="form.secondaryAccountNumber" type="text" placeholder="e.g. 0123456789" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500" />
+                  <button type="button" @click="verifyAccount('secondary')" :disabled="!form.secondaryBankCode || !form.secondaryAccountNumber || verifying.secondary" class="btn-secondary !py-2.5 !px-4 text-xs whitespace-nowrap">
+                    {{ verifying.secondary ? 'Verifying...' : 'Verify' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="mb-6">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Account Name (Auto-verified)</label>
+              <input v-model="form.secondaryAccountName" type="text" readonly class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 bg-gray-50 focus:outline-none" placeholder="Verify account to auto-fill" />
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-200">
               <label class="block text-xs font-medium text-gray-600 mb-1">Paystack Subaccount Code (Split Payouts)</label>
               <input
                 v-model="form.paystackSubaccountCode"
                 type="text"
                 placeholder="ACCT_xxxxxx"
-                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 font-mono focus:outline-none focus:border-indigo-500"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 font-mono focus:outline-none focus:border-indigo-500"
               />
               <span class="text-[11px] text-gray-500 block mt-1">Ticket sales revenue will automatically split & deposit to this subaccount.</span>
             </div>
@@ -144,10 +179,62 @@ const form = ref({
   primaryColor: '#4f46e5',
   secondaryColor: '#0f172a',
   paystackSubaccountCode: '',
-  bankName: '',
-  accountNumber: '',
-  accountName: '',
+  primaryBankCode: '',
+  primaryAccountNumber: '',
+  primaryAccountName: '',
+  secondaryBankCode: '',
+  secondaryAccountNumber: '',
+  secondaryAccountName: '',
 });
+
+const banks = ref([]);
+const verifying = ref({ primary: false, secondary: false });
+
+async function loadBanks() {
+  const token = localStorage.getItem('ticketr_admin_token');
+  try {
+    const res = await fetch(`${config.public.apiBase}/paystack/banks`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      banks.value = await res.json();
+    }
+  } catch (err) {
+    console.error('Failed to load banks', err);
+  }
+}
+
+async function verifyAccount(type) {
+  const token = localStorage.getItem('ticketr_admin_token');
+  const bankCode = type === 'primary' ? form.value.primaryBankCode : form.value.secondaryBankCode;
+  const accountNumber = type === 'primary' ? form.value.primaryAccountNumber : form.value.secondaryAccountNumber;
+  
+  if (!bankCode || !accountNumber) return;
+
+  verifying.value[type] = true;
+  try {
+    const res = await fetch(`${config.public.apiBase}/paystack/resolve-account?accountNumber=${accountNumber}&bankCode=${bankCode}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (res.ok && data.account_name) {
+      if (type === 'primary') {
+        form.value.primaryAccountName = data.account_name;
+      } else {
+        form.value.secondaryAccountName = data.account_name;
+      }
+      alert('Account verified successfully!');
+    } else {
+      alert(data.message || 'Failed to verify account number');
+      if (type === 'primary') form.value.primaryAccountName = '';
+      else form.value.secondaryAccountName = '';
+    }
+  } catch (err) {
+    alert('Network error while verifying account');
+  } finally {
+    verifying.value[type] = false;
+  }
+}
 
 async function loadTenantSettings() {
   const token = localStorage.getItem('ticketr_admin_token');
@@ -170,9 +257,13 @@ async function loadTenantSettings() {
         form.value.primaryColor = data.tenant.primaryColor || '#4f46e5';
         form.value.secondaryColor = data.tenant.secondaryColor || '#0f172a';
         form.value.paystackSubaccountCode = data.tenant.paystackSubaccountCode || '';
-        form.value.bankName = data.tenant.remittanceAccount?.bankName || data.tenant.bankName || '';
-        form.value.accountNumber = data.tenant.remittanceAccount?.accountNumber || data.tenant.accountNumber || '';
-        form.value.accountName = data.tenant.remittanceAccount?.accountName || data.tenant.accountName || '';
+        form.value.paystackSubaccountCode = data.tenant.paystackSubaccountCode || '';
+        form.value.primaryBankCode = data.tenant.primaryRemittanceAccount?.bankCode || data.tenant.remittanceAccount?.bankCode || '';
+        form.value.primaryAccountNumber = data.tenant.primaryRemittanceAccount?.accountNumber || data.tenant.remittanceAccount?.accountNumber || data.tenant.accountNumber || '';
+        form.value.primaryAccountName = data.tenant.primaryRemittanceAccount?.accountName || data.tenant.remittanceAccount?.accountName || data.tenant.accountName || '';
+        form.value.secondaryBankCode = data.tenant.secondaryRemittanceAccount?.bankCode || '';
+        form.value.secondaryAccountNumber = data.tenant.secondaryRemittanceAccount?.accountNumber || '';
+        form.value.secondaryAccountName = data.tenant.secondaryRemittanceAccount?.accountName || '';
       }
     }
   } catch (err) {
@@ -193,16 +284,27 @@ async function saveSettings() {
       .filter(e => e.length > 0);
     delete payload.notificationEmailsStr;
 
-    payload.remittanceAccount = {
-      bankName: form.value.bankName,
-      accountNumber: form.value.accountNumber,
-      accountName: form.value.accountName
-    };
+    payload.primaryRemittanceAccount = form.value.primaryBankCode ? {
+      bankCode: form.value.primaryBankCode,
+      bankName: banks.value.find(b => b.code === form.value.primaryBankCode)?.name || '',
+      accountNumber: form.value.primaryAccountNumber,
+      accountName: form.value.primaryAccountName
+    } : null;
+
+    payload.secondaryRemittanceAccount = form.value.secondaryBankCode ? {
+      bankCode: form.value.secondaryBankCode,
+      bankName: banks.value.find(b => b.code === form.value.secondaryBankCode)?.name || '',
+      accountNumber: form.value.secondaryAccountNumber,
+      accountName: form.value.secondaryAccountName
+    } : null;
     
     // Cleanup flat fields
-    delete payload.bankName;
-    delete payload.accountNumber;
-    delete payload.accountName;
+    delete payload.primaryBankCode;
+    delete payload.primaryAccountNumber;
+    delete payload.primaryAccountName;
+    delete payload.secondaryBankCode;
+    delete payload.secondaryAccountNumber;
+    delete payload.secondaryAccountName;
 
     const res = await fetch(`${config.public.apiBase}/tenants/${tenantId.value}`, {
       method: 'PATCH',
@@ -223,6 +325,7 @@ async function saveSettings() {
 }
 
 onMounted(() => {
+  loadBanks();
   loadTenantSettings();
 });
 </script>

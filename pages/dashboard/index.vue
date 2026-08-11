@@ -42,7 +42,7 @@
 
       <!-- Events List Table / Cards -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
           <h2 class="text-xl font-bold text-gray-900">My Events</h2>
           <NuxtLink to="/dashboard/events/create" class="text-xs font-semibold text-primary hover:text-primary">
             + Add New Event

@@ -129,6 +129,12 @@
         </div>
       </div>
     </div>
+    <!-- Action Loader Modal -->
+    <div v-if="actioning" class="fixed inset-0 bg-white/70 flex flex-col items-center justify-center z-[100] backdrop-blur-md">
+      <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+      <h3 class="text-lg font-bold text-gray-900">Processing...</h3>
+      <p class="text-sm text-gray-500 font-medium mt-1">Please wait while we update this order and generate tickets.</p>
+    </div>
   </div>
 </template>
 

@@ -78,6 +78,8 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { CheckCircle, XCircle, UserCheck } from 'lucide-vue-next';
 
+definePageMeta({ layout: false });
+
 const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();

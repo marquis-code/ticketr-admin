@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen flex w-full bg-white font-sans">
+  <div class="min-h-screen grid grid-cols-1 lg:grid-cols-[55%_45%] xl:grid-cols-2 w-full bg-white font-sans">
     <!-- Left: Form Container -->
-    <div class="w-full lg:w-[55%] xl:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative bg-white z-10 shadow-2xl lg:shadow-none">
+    <div class="w-full flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative bg-white z-10 shadow-2xl lg:shadow-none">
       
       <!-- Subtle top decorative element -->
       <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500"></div>
@@ -87,7 +87,7 @@
     </div>
 
     <!-- Right: Exciting Image Background -->
-    <div class="hidden lg:block lg:w-[45%] xl:w-1/2 relative overflow-hidden bg-gray-900">
+    <div class="hidden lg:block relative overflow-hidden bg-gray-900">
       <!-- Animated Background Image (Ken Burns Effect) -->
       <div class="absolute inset-0 w-full h-full">
         <img 

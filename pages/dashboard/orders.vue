@@ -82,10 +82,12 @@
                     {{ o.status }}
                   </span>
                   
-                  <div v-if="o.status === 'AWAITING_APPROVAL' && o.proofOfPaymentUrl" class="mt-2 flex justify-end gap-2">
-                    <button @click="viewReceipt(o.proofOfPaymentUrl)" class="text-xs text-indigo-600 hover:underline">View Receipt</button>
-                    <button @click="approveOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-emerald-500 text-white px-2 py-1 rounded">Approve</button>
-                    <button @click="rejectOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-red-500 text-white px-2 py-1 rounded">Reject</button>
+                  
+                  <div v-if="o.status === 'AWAITING_APPROVAL'" class="mt-3 flex flex-wrap justify-end gap-2">
+                    <button v-if="o.proofOfPaymentUrl" @click="viewReceipt(o.proofOfPaymentUrl)" class="text-xs text-indigo-600 hover:underline font-semibold">📎 View Receipt</button>
+                    <span v-else class="text-[10px] text-gray-400 italic">No receipt uploaded</span>
+                    <button @click="approveOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">✓ Approve</button>
+                    <button @click="rejectOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold transition">✕ Reject</button>
                   </div>
                 </td>
               </tr>

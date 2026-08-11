@@ -80,7 +80,7 @@
 
           <p class="text-center text-sm text-gray-500 mt-8 font-medium">
             Don't have an organization account? 
-            <NuxtLink to="/register" class="font-bold text-primary hover:underline transition-all">Sign Up</NuxtLink>
+            <NuxtLink to="/admin/signup" class="font-bold text-primary hover:underline transition-all">Sign Up</NuxtLink>
           </p>
         </div>
       </transition>

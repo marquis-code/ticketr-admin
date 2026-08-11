@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen grid grid-cols-1 lg:grid-cols-[55%_45%] xl:grid-cols-2 w-full bg-white font-sans">
+  <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2 w-full bg-white font-sans">
     <!-- Left: Form Container -->
     <div class="w-full flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative bg-white z-10 shadow-2xl lg:shadow-none">
       

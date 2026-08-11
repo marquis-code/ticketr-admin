@@ -1,7 +1,9 @@
 <template>
   <Toaster position="top-right" richColors />
   <div>
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>
 

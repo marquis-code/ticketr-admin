@@ -12,8 +12,13 @@
         <p class="text-xs text-gray-600 mb-6">Scan QR code or paste HMAC hash token from attendee's e-ticket.</p>
 
         <!-- Camera Scanner Section -->
-        <div v-if="showCamera" class="mb-6 overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-          <qrcode-stream @detect="onDetect" @error="onError" class="w-full aspect-square md:aspect-video object-cover bg-black" />
+        <div v-if="showCamera" class="mb-6 overflow-hidden rounded-xl border border-gray-200 shadow-sm relative">
+          <qrcode-stream :constraints="{ facingMode: cameraFacingMode }" @detect="onDetect" @error="onError" class="w-full aspect-square md:aspect-video object-cover bg-black" />
+          <div class="absolute top-4 right-4 z-10">
+            <button @click="toggleCamera" class="p-2.5 bg-white/90 hover:bg-white rounded-full shadow-lg text-gray-800 backdrop-blur-md transition-transform active:scale-95" title="Switch Camera">
+              <RefreshCw class="w-5 h-5" />
+            </button>
+          </div>
           <button @click="showCamera = false" class="w-full bg-gray-50 text-gray-600 py-3 text-sm font-medium border-t border-gray-200 hover:bg-gray-100 transition">Close Camera</button>
         </div>
 
@@ -72,7 +77,7 @@
 <script setup>
 import { toast } from 'vue-sonner';
 import { ref } from 'vue';
-import { Search, CheckCircle, AlertTriangle, XCircle, Camera } from 'lucide-vue-next';
+import { Search, CheckCircle, AlertTriangle, XCircle, Camera, RefreshCw } from 'lucide-vue-next';
 import { QrcodeStream } from 'vue-qrcode-reader';
 
 const config = useRuntimeConfig();
@@ -81,6 +86,11 @@ const qrInput = ref('');
 const verifying = ref(false);
 const scanResult = ref(null);
 const showCamera = ref(false);
+const cameraFacingMode = ref('environment');
+
+function toggleCamera() {
+  cameraFacingMode.value = cameraFacingMode.value === 'environment' ? 'user' : 'environment';
+}
 
 function onDetect(detectedCodes) {
   if (detectedCodes && detectedCodes.length > 0) {

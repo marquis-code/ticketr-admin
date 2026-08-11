@@ -11,6 +11,12 @@
         <h1 class="text-2xl font-extrabold text-gray-900 mb-2">Gate Entry Scanner</h1>
         <p class="text-xs text-gray-600 mb-6">Scan QR code or paste HMAC hash token from attendee's e-ticket.</p>
 
+        <!-- Camera Scanner Section -->
+        <div v-if="showCamera" class="mb-6 overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+          <qrcode-stream @detect="onDetect" @error="onError" class="w-full aspect-square md:aspect-video object-cover bg-black" />
+          <button @click="showCamera = false" class="w-full bg-gray-50 text-gray-600 py-3 text-sm font-medium border-t border-gray-200 hover:bg-gray-100 transition">Close Camera</button>
+        </div>
+
         <form @submit.prevent="verifyTicketScan" class="space-y-4">
           <div class="relative">
             <input
@@ -22,10 +28,15 @@
             />
           </div>
 
-          <button type="submit" :disabled="verifying || !qrInput" class="w-full btn-primary py-3 text-sm flex items-center justify-center gap-2">
-            <span v-if="verifying" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>{{ verifying ? 'Verifying...' : 'Verify Ticket' }}</span>
-          </button>
+          <div class="flex gap-2">
+            <button type="submit" :disabled="verifying || !qrInput" class="flex-1 btn-primary py-3 text-sm flex items-center justify-center gap-2">
+              <span v-if="verifying" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>{{ verifying ? 'Verifying...' : 'Verify Ticket' }}</span>
+            </button>
+            <button type="button" @click="showCamera = !showCamera" class="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl border border-gray-200 transition" title="Scan with Camera">
+              <Camera class="w-5 h-5" />
+            </button>
+          </div>
         </form>
       </div>
 
@@ -61,13 +72,27 @@
 <script setup>
 import { toast } from 'vue-sonner';
 import { ref } from 'vue';
-import { Search, CheckCircle, AlertTriangle, XCircle } from 'lucide-vue-next';
+import { Search, CheckCircle, AlertTriangle, XCircle, Camera } from 'lucide-vue-next';
+import { QrcodeStream } from 'vue-qrcode-reader';
 
 const config = useRuntimeConfig();
 
 const qrInput = ref('');
 const verifying = ref(false);
 const scanResult = ref(null);
+const showCamera = ref(false);
+
+function onDetect(detectedCodes) {
+  if (detectedCodes && detectedCodes.length > 0) {
+    qrInput.value = detectedCodes[0].rawValue;
+    showCamera.value = false;
+    verifyTicketScan();
+  }
+}
+
+function onError(error) {
+  toast.error(`Camera error: ${error.message}`);
+}
 
 async function verifyTicketScan() {
   const token = localStorage.getItem('ticketr_admin_token');

@@ -7,7 +7,7 @@
       <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500"></div>
 
       <transition name="fade-slide" appear>
-        <div class="w-full max-w-md mx-auto">
+        <div class="w-full max-w-md mx-auto py-8">
           <!-- Logo & Header -->
           <div class="mb-10 text-center lg:text-left">
             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-700 flex items-center justify-center mb-6 shadow-xl shadow-primary/30 mx-auto lg:mx-0 transform hover:scale-105 transition-transform">
@@ -15,12 +15,50 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
               </svg>
             </div>
-            <h1 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Welcome Back</h1>
-            <p class="text-sm text-gray-500 mt-2 font-medium">Sign in to manage your events and ticketing.</p>
+            <h1 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Register Organization</h1>
+            <p class="text-sm text-gray-500 mt-2 font-medium">Create your account to start managing events.</p>
           </div>
 
           <form @submit.prevent="handleSubmit" class="space-y-5">
             <div class="space-y-4">
+              <div class="relative group">
+                <label class="block text-sm font-bold text-gray-700 mb-1.5">Organization Name</label>
+                <input
+                  v-model="form.organizationName"
+                  type="text"
+                  placeholder="e.g. Campus Events Board"
+                  required
+                  class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all shadow-sm"
+                />
+              </div>
+
+              <div class="relative group">
+                <label class="block text-sm font-bold text-gray-700 mb-1.5">Subdomain Slug</label>
+                <div class="flex items-center shadow-sm rounded-xl">
+                  <input
+                    v-model="form.tenantSlug"
+                    type="text"
+                    placeholder="events"
+                    required
+                    class="w-full bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all relative z-10"
+                  />
+                  <span class="bg-gray-100 border border-gray-200 border-l-0 text-gray-500 text-sm px-4 py-3.5 rounded-r-xl whitespace-nowrap font-medium select-none z-0">
+                    .ticketr.org
+                  </span>
+                </div>
+              </div>
+
+              <div class="relative group">
+                <label class="block text-sm font-bold text-gray-700 mb-1.5">Full Name</label>
+                <input
+                  v-model="form.name"
+                  type="text"
+                  placeholder="John Organizer"
+                  required
+                  class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all shadow-sm"
+                />
+              </div>
+
               <div class="relative group">
                 <label class="block text-sm font-bold text-gray-700 mb-1.5">Email Address</label>
                 <input
@@ -71,7 +109,7 @@
               class="w-full btn-primary py-4 text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all mt-4"
             >
               <span v-if="submitting" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              <span v-else>Sign In Securely</span>
+              <span v-else>Create Organization Account</span>
               <svg v-if="!submitting" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -79,8 +117,8 @@
           </form>
 
           <p class="text-center text-sm text-gray-500 mt-8 font-medium">
-            Don't have an organization account? 
-            <NuxtLink to="/register" class="font-bold text-primary hover:underline transition-all">Sign Up</NuxtLink>
+            Already have an account? 
+            <NuxtLink to="/login" class="font-bold text-primary hover:underline transition-all">Sign In</NuxtLink>
           </p>
         </div>
       </transition>
@@ -143,8 +181,11 @@ const errorMsg = ref('');
 const showPassword = ref(false);
 
 const form = ref({
+  name: '',
   email: '',
   password: '',
+  organizationName: '',
+  tenantSlug: '',
 });
 
 async function handleSubmit() {
@@ -152,10 +193,14 @@ async function handleSubmit() {
   errorMsg.value = '';
 
   try {
-    const endpoint = `${config.public.apiBase}/auth/login`;
+    const endpoint = `${config.public.apiBase}/auth/register`;
     const payload = {
+      name: form.value.name,
       email: form.value.email,
       password: form.value.password,
+      role: 'ORGANIZER',
+      organizationName: form.value.organizationName,
+      tenantSlug: form.value.tenantSlug,
     };
 
     const res = await fetch(endpoint, {
@@ -171,7 +216,7 @@ async function handleSubmit() {
       useRouter().push('/dashboard');
     } else {
       const err = await res.json();
-      errorMsg.value = err.message || 'Authentication failed';
+      errorMsg.value = err.message || 'Registration failed';
     }
   } catch (err) {
     errorMsg.value = 'Network connection error';

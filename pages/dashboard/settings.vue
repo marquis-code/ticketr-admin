@@ -163,6 +163,15 @@
               />
               <span class="text-[11px] text-gray-500 block mt-1">Ticket sales revenue will automatically split & deposit to this subaccount.</span>
             </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-200" v-if="userRole === 'SUPER_ADMIN'">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Payment Method (Super Admin Only)</label>
+              <select v-model="form.paymentMethod" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 bg-white">
+                <option value="PAYSTACK">Paystack</option>
+                <option value="MANUAL_TRANSFER">Manual Bank Transfer</option>
+              </select>
+              <span class="text-[11px] text-gray-500 block mt-1">Change how this tenant accepts payments.</span>
+            </div>
           </div>
 
           <div class="pt-4 flex justify-end">
@@ -184,6 +193,7 @@ const config = useRuntimeConfig();
 
 const saving = ref(false);
 const tenantId = ref('');
+const userRole = ref('');
 const newEmail = ref('');
 const form = ref({
   name: '',
@@ -199,6 +209,7 @@ const form = ref({
   secondaryBankCode: '',
   secondaryAccountNumber: '',
   secondaryAccountName: '',
+  paymentMethod: 'PAYSTACK',
 });
 
 const banks = ref([]);
@@ -268,6 +279,7 @@ async function loadTenantSettings() {
   const user = JSON.parse(localStorage.getItem('ticketr_admin_user') || '{}');
   if (!user.tenantId) return;
   tenantId.value = user.tenantId;
+  userRole.value = user.role;
 
   try {
     const res = await fetch(`${config.public.apiBase}/auth/me`, {
@@ -290,6 +302,7 @@ async function loadTenantSettings() {
         form.value.secondaryBankCode = data.tenant.secondaryRemittanceAccount?.bankCode || '';
         form.value.secondaryAccountNumber = data.tenant.secondaryRemittanceAccount?.accountNumber || '';
         form.value.secondaryAccountName = data.tenant.secondaryRemittanceAccount?.accountName || '';
+        form.value.paymentMethod = data.tenant.paymentMethod || 'PAYSTACK';
       }
     }
   } catch (err) {

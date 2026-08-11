@@ -28,17 +28,26 @@
         <p class="text-xs text-gray-600 mt-1">Audit ticket purchases, Paystack transaction references, and revenue logs.</p>
       </div>
 
+      <!-- Filters -->
+      <div class="flex gap-2 border-b border-gray-200 pb-2">
+        <button @click="currentTab = 'ALL'" :class="currentTab === 'ALL' ? 'text-indigo-600 border-b-2 border-indigo-600 font-bold' : 'text-gray-500'" class="px-4 py-2 text-sm">All Orders</button>
+        <button @click="currentTab = 'AWAITING_APPROVAL'" :class="currentTab === 'AWAITING_APPROVAL' ? 'text-indigo-600 border-b-2 border-indigo-600 font-bold' : 'text-gray-500'" class="px-4 py-2 text-sm flex items-center gap-2">
+          Pending Approvals
+          <span v-if="pendingCount > 0" class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{{ pendingCount }}</span>
+        </button>
+      </div>
+
       <!-- Orders Table -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div v-if="loading" class="text-center py-12 text-gray-500 text-sm">
           Loading orders...
         </div>
 
-        <div v-else-if="orders.length === 0" class="text-center py-12 text-gray-500 text-sm">
-          No orders placed yet.
+        <div v-else-if="filteredOrders.length === 0" class="text-center py-12 text-gray-500 text-sm">
+          No orders found in this category.
         </div>
 
-        <div v-else class="overflow-hidden border border-gray-200 rounded-xl bg-white shadow-sm">
+        <div v-else class="overflow-x-auto border border-gray-200 rounded-xl bg-white shadow-sm">
           <table class="w-full text-left border-collapse whitespace-nowrap">
             <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
               <tr>
@@ -50,7 +59,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 bg-white">
-              <tr v-for="o in orders" :key="o._id" class="hover:bg-gray-50 transition-colors duration-150">
+              <tr v-for="o in filteredOrders" :key="o._id" class="hover:bg-gray-50 transition-colors duration-150">
                 <td class="px-6 py-4 md:px-6">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
@@ -82,12 +91,22 @@
                 </td>
                 <td class="px-6 py-4 md:px-6 text-right">
                   <span
-                    :class="o.status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                    :class="{
+                      'bg-emerald-50 text-emerald-700 border-emerald-200': o.status === 'PAID',
+                      'bg-amber-50 text-amber-700 border-amber-200': o.status === 'PENDING',
+                      'bg-orange-50 text-orange-700 border-orange-200': o.status === 'AWAITING_APPROVAL',
+                      'bg-red-50 text-red-700 border-red-200': o.status === 'FAILED' || o.status === 'CANCELLED'
+                    }"
                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border shadow-sm"
                   >
-                    <span class="w-1.5 h-1.5 rounded-full" :class="o.status === 'PAID' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
                     {{ o.status }}
                   </span>
+                  
+                  <div v-if="o.status === 'AWAITING_APPROVAL' && o.proofOfPaymentUrl" class="mt-2 flex justify-end gap-2">
+                    <button @click="viewReceipt(o.proofOfPaymentUrl)" class="text-xs text-indigo-600 hover:underline">View Receipt</button>
+                    <button @click="approveOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-emerald-500 text-white px-2 py-1 rounded">Approve</button>
+                    <button @click="rejectOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-red-500 text-white px-2 py-1 rounded">Reject</button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -95,18 +114,144 @@
         </div>
       </div>
     </main>
+
+    <!-- Receipt Modal -->
+    <div v-if="showingReceipt" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeReceipt">
+      <div class="bg-white rounded-xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col h-[80vh]">
+        <div class="p-4 border-b flex justify-between items-center bg-gray-50 shrink-0">
+          <h3 class="font-bold">Proof of Payment</h3>
+          <button @click="closeReceipt" class="text-gray-500 font-bold hover:text-black">&times;</button>
+        </div>
+        <div class="p-4 flex-grow overflow-auto flex justify-center bg-gray-100">
+          <iframe v-if="isPdf(receiptUrl)" :src="receiptUrl" class="w-full h-full border-0" frameborder="0"></iframe>
+          <img v-else :src="receiptUrl" alt="Receipt" class="max-w-full object-contain" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div v-if="confirmModal.show" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div class="bg-white border border-gray-200 w-full max-w-sm p-6 rounded-2xl shadow-xl">
+        <h3 class="text-lg font-bold text-gray-900 mb-2">{{ confirmModal.title }}</h3>
+        <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
+        <div class="flex justify-end gap-3">
+          <button @click="confirmModal.show = false" class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">Cancel</button>
+          <button @click="confirmModal.onConfirm(); confirmModal.show = false" class="px-4 py-2 text-sm font-semibold text-white rounded-lg transition" :class="confirmModal.variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'">{{ confirmModal.confirmText }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { toast } from 'vue-sonner';
 
 const config = useRuntimeConfig();
 
 const orders = ref([]);
 const loading = ref(true);
+const actioning = ref(null);
 const tenantLogo = ref('');
 const tenantName = ref('');
+const currentTab = ref('ALL');
+
+const pendingCount = computed(() => orders.value.filter(o => o.status === 'AWAITING_APPROVAL').length);
+
+const filteredOrders = computed(() => {
+  if (currentTab.value === 'ALL') return orders.value;
+  return orders.value.filter(o => o.status === currentTab.value);
+});
+
+// Modal state
+const showingReceipt = ref(false);
+const receiptUrl = ref('');
+
+const confirmModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: 'Confirm',
+  variant: 'primary',
+  onConfirm: () => {},
+});
+
+function showConfirm({ title, message, confirmText, variant, onConfirm }) {
+  confirmModal.value = { show: true, title, message, confirmText: confirmText || 'Confirm', variant: variant || 'primary', onConfirm };
+}
+
+function viewReceipt(url) {
+  receiptUrl.value = url;
+  showingReceipt.value = true;
+}
+
+function closeReceipt() {
+  showingReceipt.value = false;
+  receiptUrl.value = '';
+}
+
+function isPdf(url) {
+  if (!url) return false;
+  return url.toLowerCase().includes('.pdf');
+}
+
+async function approveOrder(orderId) {
+  showConfirm({
+    title: 'Approve Payment',
+    message: 'Are you sure you want to approve this payment and issue tickets? This action cannot be undone.',
+    confirmText: 'Approve & Issue Tickets',
+    variant: 'primary',
+    onConfirm: async () => {
+      const token = localStorage.getItem('ticketr_admin_token');
+      actioning.value = orderId;
+      try {
+        const res = await fetch(`${config.public.apiBase}/orders/admin/${orderId}/approve`, {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          toast.success('Order approved successfully');
+          loadOrders();
+        } else {
+          toast.error('Failed to approve order');
+        }
+      } catch (err) {
+        toast.error('Error approving order');
+      } finally {
+        actioning.value = null;
+      }
+    }
+  });
+}
+
+async function rejectOrder(orderId) {
+  showConfirm({
+    title: 'Reject Payment',
+    message: 'Are you sure you want to reject this payment? The buyer will not receive their tickets.',
+    confirmText: 'Reject Payment',
+    variant: 'danger',
+    onConfirm: async () => {
+      const token = localStorage.getItem('ticketr_admin_token');
+      actioning.value = orderId;
+      try {
+        const res = await fetch(`${config.public.apiBase}/orders/admin/${orderId}/reject`, {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          toast.success('Order rejected');
+          loadOrders();
+        } else {
+          toast.error('Failed to reject order');
+        }
+      } catch (err) {
+        toast.error('Error rejecting order');
+      } finally {
+        actioning.value = null;
+      }
+    }
+  });
+}
 
 async function loadTenantDetails() {
   const token = localStorage.getItem('ticketr_admin_token');

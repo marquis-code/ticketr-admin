@@ -98,6 +98,18 @@
       <input type="file" ref="imageUploadInput" class="hidden" accept="image/*" @change="handleImageUpload" />
     </main>
   </div>
+
+  <!-- Confirmation Modal -->
+  <div v-if="confirmModal.show" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div class="bg-white border border-gray-200 w-full max-w-sm p-6 rounded-2xl shadow-xl">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">{{ confirmModal.title }}</h3>
+      <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
+      <div class="flex justify-end gap-3">
+        <button @click="confirmModal.show = false" class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">Cancel</button>
+        <button @click="confirmModal.onConfirm(); confirmModal.show = false" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">{{ confirmModal.confirmText }}</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -112,6 +124,18 @@ const loading = ref(true);
 const search = ref('');
 const imageUploadInput = ref(null);
 const currentEditingEventId = ref(null);
+
+const confirmModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: 'Confirm',
+  onConfirm: () => {},
+});
+
+function showConfirm({ title, message, confirmText, onConfirm }) {
+  confirmModal.value = { show: true, title, message, confirmText: confirmText || 'Confirm', onConfirm };
+}
 
 const filteredEvents = computed(() => {
   if (!search.value) return events.value;
@@ -141,19 +165,26 @@ async function loadEvents() {
 }
 
 async function deleteEvent(eventId) {
-  if (!confirm('Are you sure you want to delete this event and its ticket tiers?')) return;
-  const token = localStorage.getItem('ticketr_admin_token');
-  try {
-    const res = await fetch(`${config.public.apiBase}/events/${eventId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      await loadEvents();
+  showConfirm({
+    title: 'Delete Event',
+    message: 'Are you sure you want to delete this event and all its ticket tiers? This action cannot be undone.',
+    confirmText: 'Delete Event',
+    onConfirm: async () => {
+      const token = localStorage.getItem('ticketr_admin_token');
+      try {
+        const res = await fetch(`${config.public.apiBase}/events/${eventId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          toast.success('Event deleted successfully');
+          await loadEvents();
+        }
+      } catch (e) {
+        toast.error('Failed to delete event');
+      }
     }
-  } catch (e) {
-    console.error(e);
-  }
+  });
 }
 
 function triggerImageUpload(eventId) {

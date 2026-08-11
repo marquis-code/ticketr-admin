@@ -64,9 +64,16 @@
                 </td>
                 <td class="px-6 py-4 md:px-6">
                   <div class="flex items-center gap-2">
-                    <span class="font-mono text-[11px] text-gray-500 truncate max-w-[120px]" :title="o.paystackReference">
+                    <template v-if="o.proofOfPaymentUrl">
+                      <div class="cursor-pointer overflow-hidden rounded border border-gray-200 shadow-sm" @click="viewReceipt(o.proofOfPaymentUrl)" title="View Proof of Payment">
+                        <img v-if="!isPdf(o.proofOfPaymentUrl)" :src="o.proofOfPaymentUrl" class="w-12 h-8 object-cover hover:opacity-80 transition" alt="Proof" />
+                        <div v-else class="w-12 h-8 flex items-center justify-center bg-gray-100 text-[10px] font-bold text-gray-600 hover:bg-gray-200 transition">PDF</div>
+                      </div>
+                    </template>
+                    <span v-else-if="o.paystackReference" class="font-mono text-[11px] text-gray-500 truncate max-w-[120px]" :title="o.paystackReference">
                       {{ o.paystackReference }}
                     </span>
+                    <span v-else class="text-xs text-gray-400 italic">No reference</span>
                   </div>
                 </td>
                 <td class="px-6 py-4 md:px-6 text-right">

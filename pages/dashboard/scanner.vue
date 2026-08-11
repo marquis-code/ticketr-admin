@@ -3,8 +3,8 @@
     <!-- Top Bar -->
     
 
-    <main class="max-w-xl mx-auto px-4 md:px-6 py-12 flex-grow w-full space-y-6">
-      <div class="glass-card rounded-2xl p-8 border-primary/30 text-center">
+    <main class="max-w-xl mx-auto px-2 sm:px-4 md:px-6 py-8 md:py-12 flex-grow w-full space-y-6">
+      <div class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 border-primary/30 text-center">
         <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Search class="w-8 h-8" />
         </div>

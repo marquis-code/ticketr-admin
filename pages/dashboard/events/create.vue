@@ -3,8 +3,8 @@
     <!-- Navbar -->
     
 
-    <main class="max-w-4xl mx-auto px-4 md:px-6 py-8 flex-grow w-full">
-      <div class="glass-card rounded-2xl p-8 border-primary/30">
+    <main class="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8 flex-grow w-full">
+      <div class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 border-primary/30">
         <h1 class="text-2xl font-extrabold text-gray-900 mb-6">Create New Event</h1>
 
         <form @submit.prevent="submitForm" class="space-y-6">

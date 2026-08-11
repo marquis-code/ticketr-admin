@@ -2,13 +2,13 @@
   <div >
     
 
-    <main class="max-w-4xl mx-auto px-4 md:px-6 py-8 flex-grow w-full space-y-6">
-      <div>
+    <main class="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8 flex-grow w-full space-y-6">
+      <div class="px-2 sm:px-0">
         <h1 class="text-2xl font-extrabold text-gray-900">Organization Settings</h1>
         <p class="text-xs text-gray-600 mt-1">Configure your organization's custom branding colors, logo, and Paystack payout settings.</p>
       </div>
 
-      <div class="glass-card rounded-2xl p-8 border-primary/30">
+      <div class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 border-primary/30">
         <form @submit.prevent="saveSettings" class="space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

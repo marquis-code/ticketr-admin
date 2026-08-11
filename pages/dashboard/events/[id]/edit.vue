@@ -3,7 +3,7 @@
     <!-- Navbar -->
     
 
-    <main class="max-w-4xl mx-auto px-4 md:px-6 py-8 flex-grow w-full">
+    <main class="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8 flex-grow w-full">
       <div v-if="loading" class="flex justify-center items-center py-20">
         <Loader2 class="w-8 h-8 animate-spin text-primary" />
       </div>
@@ -12,7 +12,7 @@
         <p class="text-gray-500">Event not found.</p>
       </div>
 
-      <div v-else class="glass-card rounded-2xl p-8 border-primary/30">
+      <div v-else class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 border-primary/30">
         <h1 class="text-2xl font-extrabold text-gray-900 mb-6">Edit Event: {{ eventData.title }}</h1>
 
         <!-- Tabs -->

@@ -1,9 +1,7 @@
 <template>
   <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2 w-full bg-white font-sans">
-    <!-- Left: Form Container -->
     <div class="w-full flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative bg-white z-10 shadow-2xl lg:shadow-none">
       
-      <!-- Subtle top decorative element -->
       <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500"></div>
 
       <transition name="fade-slide" appear>

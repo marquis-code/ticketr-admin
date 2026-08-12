@@ -64,6 +64,24 @@
               />
             </div>
 
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Check-In Starts (Optional)</label>
+              <input
+                v-model="form.checkInStart"
+                type="datetime-local"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Check-In Ends (Optional)</label>
+              <input
+                v-model="form.checkInEnd"
+                type="datetime-local"
+                class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
+
             <div class="md:col-span-2">
               <label class="block text-xs font-medium text-gray-600 mb-1">Event Description</label>
               <textarea
@@ -182,7 +200,7 @@
           </div>
 
           <div class="pt-4 flex justify-end">
-            <button type="submit" :disabled="submitting" class="btn-primary py-3 px-8 text-sm">
+            <button type="submit" :disabled="submitting" class="w-full sm:w-auto btn-primary py-3 px-8 text-sm">
               <Send v-if="!submitting" class="w-4 h-4" />
               <span>{{ submitting ? 'Publishing Event...' : 'Publish Event' }}</span>
             </button>
@@ -210,6 +228,8 @@ const form = ref({
   location: '',
   startDate: '',
   endDate: '',
+  checkInStart: '',
+  checkInEnd: '',
   description: '',
   carouselImages: [],
   tiers: [
@@ -288,6 +308,8 @@ async function submitForm() {
     formData.append('location', form.value.location);
     formData.append('startDate', form.value.startDate);
     formData.append('endDate', form.value.endDate);
+    if (form.value.checkInStart) formData.append('checkInStart', form.value.checkInStart);
+    if (form.value.checkInEnd) formData.append('checkInEnd', form.value.checkInEnd);
     formData.append('description', form.value.description);
     formData.append('carouselImages', JSON.stringify(form.value.carouselImages));
     formData.append('tiers', JSON.stringify(form.value.tiers));

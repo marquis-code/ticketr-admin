@@ -7,17 +7,15 @@
       <transition name="fade-slide" appear>
         <div class="w-full max-w-md mx-auto">
           <!-- Logo & Header -->
-          <div class="mb-10 text-center lg:text-left">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-700 flex items-center justify-center mb-6 shadow-xl shadow-primary/30 mx-auto lg:mx-0 transform hover:scale-105 transition-transform">
-              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-              </svg>
+          <div class="mb-10 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-700 flex items-center justify-center mb-6 shadow-xl shadow-primary/30 mx-auto transform hover:scale-105 transition-transform">
+              <Ticket class="w-6 h-6 text-white" />
             </div>
             <h1 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Welcome Back</h1>
             <p class="text-sm text-gray-500 mt-2 font-medium">Sign in to manage your events and ticketing.</p>
           </div>
 
-          <form @submit.prevent="handleSubmit" class="space-y-5">
+          <form v-if="!showOtpForm" @submit.prevent="handleSubmit" class="space-y-5">
             <div class="space-y-4">
               <div class="relative group">
                 <label class="block text-sm font-bold text-gray-700 mb-1.5">Email Address</label>
@@ -31,7 +29,10 @@
               </div>
 
               <div class="relative group">
-                <label class="block text-sm font-bold text-gray-700 mb-1.5">Password</label>
+                <div class="flex justify-between mb-1.5">
+                  <label class="block text-sm font-bold text-gray-700">Password</label>
+                  <NuxtLink to="/forgot-password" class="text-xs font-semibold text-primary hover:underline">Forgot Password?</NuxtLink>
+                </div>
                 <div class="relative shadow-sm rounded-xl">
                   <input
                     v-model="form.password"
@@ -55,9 +56,7 @@
             <transition name="fade">
               <div v-if="errorMsg" class="p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
                 <div class="bg-red-100 p-1 rounded-full text-red-500 mt-0.5">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <AlertCircle class="w-4 h-4" />
                 </div>
                 <p class="text-red-700 text-sm font-medium">{{ errorMsg }}</p>
               </div>
@@ -68,11 +67,58 @@
               :disabled="submitting" 
               class="w-full btn-primary py-4 text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all mt-4"
             >
-              <span v-if="submitting" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <AppLoader v-if="submitting" size="sm" color="white" />
               <span v-else>Sign In Securely</span>
-              <svg v-if="!submitting" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <ArrowRight v-if="!submitting" class="w-5 h-5" />
+            </button>
+          </form>
+
+          <form v-else @submit.prevent="handleOtpSubmit" class="space-y-5">
+            <div class="text-center mb-6">
+              <h2 class="text-lg font-bold text-gray-900">Enter OTP</h2>
+              <p class="text-sm text-gray-500 mt-1">We sent a 6-digit code to {{ otpEmail }}.</p>
+            </div>
+            <div class="space-y-4">
+              <div class="relative group">
+                <label class="block text-sm font-bold text-gray-700 mb-3 text-center">6-Digit Code</label>
+                <div class="flex justify-center gap-2 sm:gap-3">
+                  <input
+                    v-for="(digit, index) in 6"
+                    :key="index"
+                    ref="otpInputs"
+                    v-model="otpArray[index]"
+                    @input="onOtpInput(index, $event)"
+                    @keydown="onOtpKeydown(index, $event)"
+                    @paste="onOtpPaste"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    class="w-12 h-14 sm:w-14 sm:h-16 bg-gray-50 border border-gray-200 rounded-xl text-center text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary focus:bg-white transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <transition name="fade">
+              <div v-if="errorMsg" class="p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
+                <div class="bg-red-100 p-1 rounded-full text-red-500 mt-0.5">
+                  <AlertCircle class="w-4 h-4" />
+                </div>
+                <p class="text-red-700 text-sm font-medium">{{ errorMsg }}</p>
+              </div>
+            </transition>
+
+            <button 
+              type="submit" 
+              :disabled="submitting" 
+              class="w-full btn-primary py-4 text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all mt-4"
+            >
+              <AppLoader v-if="submitting" size="sm" color="white" />
+              <span v-else>Verify OTP</span>
+              <ArrowRight v-if="!submitting" class="w-5 h-5" />
+            </button>
+            <button type="button" @click="resetToLogin" class="w-full py-2 text-sm text-gray-500 hover:text-gray-700 font-medium text-center">
+              Back to Login
             </button>
           </form>
 
@@ -129,8 +175,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import { ref, watch, nextTick } from 'vue';
+import { Eye, EyeOff, Ticket, AlertCircle, ArrowRight } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
 
@@ -140,10 +186,55 @@ const submitting = ref(false);
 const errorMsg = ref('');
 const showPassword = ref(false);
 
+const showOtpForm = ref(false);
+const otpEmail = ref('');
+
 const form = ref({
   email: '',
   password: '',
+  otp: '',
 });
+
+const otpArray = ref(['', '', '', '', '', '']);
+const otpInputs = ref([]);
+
+watch(otpArray, (newVal) => {
+  form.value.otp = newVal.join('');
+}, { deep: true });
+
+function onOtpInput(index, event) {
+  const val = event.target.value.replace(/\D/g, '');
+  otpArray.value[index] = val; // Ensure only numbers
+  if (val && index < 5) {
+    otpInputs.value[index + 1]?.focus();
+  }
+}
+
+function onOtpKeydown(index, event) {
+  if (event.key === 'Backspace' && !otpArray.value[index] && index > 0) {
+    otpInputs.value[index - 1]?.focus();
+  }
+}
+
+function onOtpPaste(event) {
+  event.preventDefault();
+  const pasteData = event.clipboardData.getData('text/plain').replace(/\D/g, '').slice(0, 6);
+  if (pasteData) {
+    for (let i = 0; i < pasteData.length; i++) {
+      otpArray.value[i] = pasteData[i];
+    }
+    const focusIndex = pasteData.length < 6 ? pasteData.length : 5;
+    nextTick(() => {
+      otpInputs.value[focusIndex]?.focus();
+    });
+  }
+}
+
+function resetToLogin() {
+  showOtpForm.value = false;
+  form.value.otp = '';
+  otpArray.value = ['', '', '', '', '', ''];
+}
 
 async function handleSubmit() {
   submitting.value = true;
@@ -164,12 +255,50 @@ async function handleSubmit() {
 
     if (res.ok) {
       const data = await res.json();
+      if (data.requireOtp) {
+        showOtpForm.value = true;
+        otpEmail.value = data.email;
+      } else {
+        localStorage.setItem('ticketr_admin_token', data.accessToken);
+        localStorage.setItem('ticketr_admin_user', JSON.stringify(data.user));
+        useRouter().push('/dashboard');
+      }
+    } else {
+      const err = await res.json();
+      errorMsg.value = err.message || 'Authentication failed';
+    }
+  } catch (err) {
+    errorMsg.value = 'Network connection error';
+  } finally {
+    submitting.value = false;
+  }
+}
+
+async function handleOtpSubmit() {
+  submitting.value = true;
+  errorMsg.value = '';
+
+  try {
+    const endpoint = `${config.public.apiBase}/auth/verify-login-otp`;
+    const payload = {
+      email: form.value.email,
+      otp: form.value.otp,
+    };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
       localStorage.setItem('ticketr_admin_token', data.accessToken);
       localStorage.setItem('ticketr_admin_user', JSON.stringify(data.user));
       useRouter().push('/dashboard');
     } else {
       const err = await res.json();
-      errorMsg.value = err.message || 'Authentication failed';
+      errorMsg.value = err.message || 'OTP Verification failed';
     }
   } catch (err) {
     errorMsg.value = 'Network connection error';

@@ -3,7 +3,7 @@
     <div class="w-full max-w-md">
       <!-- Verifying state -->
       <div v-if="verifying" class="glass-card rounded-2xl p-12 text-center shadow-lg">
-        <div class="inline-block w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <AppLoader size="xl" color="indigo" class="inline-block" />
         <h3 class="text-xl font-bold text-gray-900 mt-6">Verifying Ticket...</h3>
         <p class="text-sm text-gray-600 mt-2">Checking validity and logging entry...</p>
       </div>
@@ -34,7 +34,7 @@
 
         <div class="flex flex-col gap-3">
           <button @click="verifyTicket(true)" :disabled="verifying" class="btn-primary w-full py-3 flex justify-center items-center gap-2">
-            <div v-if="verifying" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <AppLoader v-if="verifying" size="sm" color="white" />
             Check In Attendee
           </button>
           <button @click="goHome" class="w-full py-3 text-sm font-semibold text-gray-600 hover:text-gray-900">Cancel</button>

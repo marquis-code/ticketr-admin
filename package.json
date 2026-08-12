@@ -11,13 +11,17 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^1.0.1",
+    "@vueup/vue-quill": "^1.5.5",
     "axios": "^1.19.0",
+    "chart.js": "^4.5.1",
+    "flatpickr": "^4.6.13",
     "lucide-vue-next": "^0.474.0",
     "nuxt": "^3.15.4",
     "pinia": "^4.0.2",
     "qrcode": "^1.5.4",
     "vite": "^8.2.1",
     "vue": "^3.5.13",
+    "vue-chartjs": "^5.3.4",
     "vue-qrcode-reader": "^5.6.0",
     "vue-router": "^4.5.0",
     "vue-sonner": "^2.0.9"

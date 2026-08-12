@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen   flex items-center justify-center">
-    <div class="inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <AppLoader size="lg" color="indigo" class="inline-block" />
   </div>
 </template>
 

@@ -8,9 +8,23 @@
         <p class="text-xs text-gray-600 mt-1">Configure your organization's custom branding colors, logo, and Paystack payout settings.</p>
       </div>
 
-      <div class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 border-primary/30">
+      <!-- Tabs Navigation -->
+      <div class="flex gap-2 border-b border-gray-200 pb-2 px-2 sm:px-0 mt-4">
+        <button @click="currentTab = 'GENERAL'" :class="currentTab === 'GENERAL' ? 'text-indigo-600 border-b-2 border-indigo-600 font-bold' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-2 text-sm transition-colors">General</button>
+        <button @click="currentTab = 'BRANDING'" :class="currentTab === 'BRANDING' ? 'text-indigo-600 border-b-2 border-indigo-600 font-bold' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-2 text-sm transition-colors">Branding</button>
+        <button @click="currentTab = 'PAYOUTS'" :class="currentTab === 'PAYOUTS' ? 'text-indigo-600 border-b-2 border-indigo-600 font-bold' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-2 text-sm transition-colors">Financials & Payouts</button>
+      </div>
+
+      <div v-if="loading" class="py-24">
+        <TableLoadingState message="Loading organization settings..." />
+      </div>
+
+      <div v-else class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 border-primary/30 mt-4">
         <form @submit.prevent="saveSettings" class="space-y-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          <!-- GENERAL TAB -->
+          <div v-show="currentTab === 'GENERAL'" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-medium text-gray-600 mb-1">Organization Name</label>
               <input
@@ -63,9 +77,12 @@
                 </span>
               </div>
             </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- BRANDING TAB -->
+          <div v-show="currentTab === 'BRANDING'" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-medium text-gray-600 mb-1">Primary Color (Hex)</label>
               <div class="flex items-center gap-3">
@@ -81,10 +98,13 @@
                 <input v-model="form.secondaryColor" type="text" class="w-full  border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-gray-900" />
               </div>
             </div>
+            </div>
           </div>
 
-          <div class="pt-6 border-t border-gray-200">
-            <h2 class="text-sm font-bold text-gray-900 mb-1">Primary Remittance Account</h2>
+          <!-- PAYOUTS TAB -->
+          <div v-show="currentTab === 'PAYOUTS'" class="space-y-6">
+            <div>
+              <h2 class="text-sm font-bold text-gray-900 mb-1">Primary Remittance Account</h2>
             <p class="text-xs text-gray-500 mb-4">Your main account for receiving ticket sales payouts.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
@@ -147,15 +167,16 @@
 
             <div class="mt-6 pt-6 border-t border-gray-200" v-if="userRole === 'SUPER_ADMIN'">
               <label class="block text-xs font-medium text-gray-600 mb-1">Payment Method (Super Admin Only)</label>
-              <select v-model="form.paymentMethod" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 bg-white">
-                <option value="PAYSTACK">Paystack</option>
-                <option value="MANUAL_TRANSFER">Manual Bank Transfer</option>
-              </select>
+              <CustomSelect 
+                v-model="form.paymentMethod" 
+                :options="[{ label: 'Paystack', value: 'PAYSTACK' }, { label: 'Manual Bank Transfer', value: 'MANUAL_TRANSFER' }]" 
+              />
               <span class="text-[11px] text-gray-500 block mt-1">Change how this tenant accepts payments.</span>
+            </div>
             </div>
           </div>
 
-          <div class="pt-4 flex justify-end">
+          <div class="pt-4 flex justify-end border-t border-gray-100 mt-8">
             <button type="submit" :disabled="saving" class="btn-primary text-xs !py-2.5 !px-4 md:px-6">
               {{ saving ? 'Saving Changes...' : 'Save Settings' }}
             </button>
@@ -173,9 +194,11 @@ import { ref, onMounted } from 'vue';
 const config = useRuntimeConfig();
 
 const saving = ref(false);
+const loading = ref(true);
 const tenantId = ref('');
 const userRole = ref('');
 const newEmail = ref('');
+const currentTab = ref('GENERAL');
 const form = ref({
   name: '',
   slug: '',
@@ -288,6 +311,8 @@ async function loadTenantSettings() {
     }
   } catch (err) {
     console.error(err);
+  } finally {
+    loading.value = false;
   }
 }
 

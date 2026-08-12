@@ -6,6 +6,9 @@
       <div>
         <h1 class="text-2xl font-extrabold text-gray-900">Orders & Financial Transactions</h1>
         <p class="text-xs text-gray-600 mt-1">Audit ticket purchases, Paystack transaction references, and revenue logs.</p>
+        <p class="text-[11px] text-amber-700 bg-amber-50 px-3 py-2 rounded-lg mt-3 inline-block font-medium border border-amber-200">
+          <strong>Note:</strong> You can approve uploaded receipts for <strong>AWAITING_APPROVAL</strong> orders, or manually Mark as Paid/Send Reminders for <strong>PENDING</strong> orders.
+        </p>
       </div>
 
       <!-- Filters -->
@@ -19,13 +22,8 @@
 
       <!-- Orders Table -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div v-if="loading" class="text-center py-12 text-gray-500 text-sm">
-          Loading orders...
-        </div>
-
-        <div v-else-if="filteredOrders.length === 0" class="text-center py-12 text-gray-500 text-sm">
-          No orders found in this category.
-        </div>
+        <TableLoadingState v-if="loading" message="Loading orders..." />
+        <TableEmptyState v-else-if="filteredOrders.length === 0" title="No Orders Found" message="No orders found in this category." />
 
         <div v-else class="overflow-x-auto border border-gray-200 rounded-xl bg-white shadow-sm">
           <table class="w-full text-left border-collapse whitespace-nowrap">
@@ -56,7 +54,7 @@
                 </td>
                 <td class="px-6 py-4 md:px-6">
                   <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 border border-gray-100 text-xs font-medium text-gray-700">
-                    🎪 {{ o.eventId?.title || 'Unknown Event' }}
+                    <Ticket class="w-3.5 h-3.5" /> {{ o.eventId?.title || 'Unknown Event' }}
                   </div>
                 </td>
                 <td class="px-6 py-4 md:px-6">
@@ -91,10 +89,15 @@
                   
                   
                   <div v-if="o.status === 'AWAITING_APPROVAL'" class="mt-3 flex flex-wrap justify-end gap-2">
-                    <button v-if="o.proofOfPaymentUrl" @click="viewReceipt(o.proofOfPaymentUrl)" class="text-xs text-indigo-600 hover:underline font-semibold">📎 View Receipt</button>
+                    <button v-if="o.proofOfPaymentUrl" @click="viewReceipt(o.proofOfPaymentUrl)" class="text-xs text-indigo-600 hover:underline font-semibold flex items-center gap-1"><Paperclip class="w-3.5 h-3.5" /> View Receipt</button>
                     <span v-else class="text-[10px] text-gray-400 italic">No receipt uploaded</span>
-                    <button @click="approveOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">✓ Approve</button>
-                    <button @click="rejectOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold transition">✕ Reject</button>
+                    <button @click="approveOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1"><Check class="w-3.5 h-3.5" /> Approve</button>
+                    <button @click="rejectOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1"><X class="w-3.5 h-3.5" /> Reject</button>
+                  </div>
+                  
+                  <div v-else-if="o.status === 'PENDING'" class="mt-3 flex flex-wrap justify-end gap-2">
+                    <button @click="forceApproveOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1"><Check class="w-3.5 h-3.5" /> Mark as Paid</button>
+                    <button @click="remindOrder(o._id)" :disabled="actioning === o._id" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1"><Bell class="w-3.5 h-3.5" /> Send Reminder</button>
                   </div>
                 </td>
               </tr>
@@ -122,18 +125,91 @@
     <div v-if="confirmModal.show" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div class="bg-white border border-gray-200 w-full max-w-sm p-6 rounded-2xl shadow-xl">
         <h3 class="text-lg font-bold text-gray-900 mb-2">{{ confirmModal.title }}</h3>
-        <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
-        <div class="flex justify-end gap-3">
-          <button @click="confirmModal.show = false" class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">Cancel</button>
-          <button @click="confirmModal.onConfirm(); confirmModal.show = false" class="px-4 py-2 text-sm font-semibold text-white rounded-lg transition" :class="confirmModal.variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'">{{ confirmModal.confirmText }}</button>
+        <p class="text-sm text-gray-500 mb-4">{{ confirmModal.message }}</p>
+        
+        <div v-if="confirmModal.requireReason" class="mb-6">
+          <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Reason for approval <span class="text-red-500">*</span></label>
+          <textarea v-model="confirmModal.reason" rows="2" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="e.g. Verified transfer in bank app"></textarea>
+        </div>
+
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
+          <button @click="confirmModal.show = false" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl sm:rounded-lg hover:bg-gray-200 transition">Cancel</button>
+          <button 
+            @click="confirmModal.onConfirm(confirmModal.reason); confirmModal.show = false" 
+            :disabled="confirmModal.requireReason && !confirmModal.reason"
+            class="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-semibold text-white rounded-xl sm:rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed" 
+            :class="confirmModal.variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'">
+            {{ confirmModal.confirmText }}
+          </button>
         </div>
       </div>
     </div>
     <!-- Action Loader Modal -->
     <div v-if="actioning" class="fixed inset-0 bg-white/70 flex flex-col items-center justify-center z-[100] backdrop-blur-md">
-      <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+      <AppLoader size="xl" color="indigo" class="mb-4" />
       <h3 class="text-lg font-bold text-gray-900">Processing...</h3>
       <p class="text-sm text-gray-500 font-medium mt-1">Please wait while we update this order and generate tickets.</p>
+    </div>
+
+    <!-- Email Composer Modal -->
+    <div v-if="composerModal.show" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm overflow-y-auto">
+      <div class="bg-white border border-gray-200 w-full max-w-2xl rounded-2xl shadow-xl flex flex-col my-8 max-h-[90vh]">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">Compose Reminder Email</h3>
+            <p class="text-xs text-gray-500 mt-1">Personalize the reminder message for {{ composerModal.customerName }}</p>
+          </div>
+          <button @click="composerModal.show = false" class="text-gray-400 hover:text-gray-600 transition">
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto flex-1 space-y-5">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Subject Line</label>
+            <input 
+              v-model="composerModal.subject" 
+              type="text" 
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-sm transition"
+            />
+          </div>
+          
+          <div class="flex-1 flex flex-col">
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Email Body (Rich Text)</label>
+            <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition h-64 bg-white flex flex-col">
+              <ClientOnly>
+                <QuillEditor 
+                  v-model:content="composerModal.message" 
+                  contentType="html" 
+                  theme="snow" 
+                  toolbar="essential"
+                  class="flex-1 overflow-y-auto"
+                />
+                <template #fallback>
+                  <div class="p-4 text-sm text-gray-500 flex items-center justify-center h-full">Loading rich text editor...</div>
+                </template>
+              </ClientOnly>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-2">
+              Note: The beautifully branded email wrapper and the "Complete Payment" button will automatically be added around your message.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-4 sm:p-6 border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0 bg-gray-50/50 rounded-b-2xl">
+          <button @click="composerModal.show = false" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition shadow-sm">
+            Cancel
+          </button>
+          <button 
+            @click="sendCustomReminder" 
+            :disabled="isSending"
+            class="w-full sm:w-auto px-6 py-3 sm:py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <AppLoader v-if="isSending" size="sm" color="white" />
+            <span>Send Email</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -141,8 +217,31 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { toast } from 'vue-sonner';
+import { Ticket, Paperclip, Check, X, Bell } from 'lucide-vue-next';
 
 const config = useRuntimeConfig();
+
+const isSending = ref(false);
+
+const composerModal = ref({
+  show: false,
+  orderId: null,
+  customerName: '',
+  subject: '',
+  message: '',
+});
+
+function openComposer(order) {
+  const eventName = order.eventId?.title || 'the event';
+  
+  composerModal.value = {
+    show: true,
+    orderId: order._id,
+    customerName: order.customerName,
+    subject: `Complete your booking for ${eventName}`,
+    message: `<p>Hi <strong>${order.customerName}</strong>,</p><p><br></p><p>We noticed you started booking a ticket for <strong>${eventName}</strong> but didn't finish. Secure your spot now before tickets run out!</p>`,
+  };
+}
 
 const orders = ref([]);
 const loading = ref(true);
@@ -151,10 +250,13 @@ const tenantLogo = ref('');
 const tenantName = ref('');
 const currentTab = ref('ALL');
 
-const pendingCount = computed(() => orders.value.filter(o => o.status === 'AWAITING_APPROVAL').length);
+const pendingCount = computed(() => orders.value.filter(o => ['AWAITING_APPROVAL', 'PENDING'].includes(o.status)).length);
 
 const filteredOrders = computed(() => {
   if (currentTab.value === 'ALL') return orders.value;
+  if (currentTab.value === 'AWAITING_APPROVAL') {
+    return orders.value.filter(o => ['AWAITING_APPROVAL', 'PENDING'].includes(o.status));
+  }
   return orders.value.filter(o => o.status === currentTab.value);
 });
 
@@ -168,11 +270,22 @@ const confirmModal = ref({
   message: '',
   confirmText: 'Confirm',
   variant: 'primary',
+  requireReason: false,
+  reason: '',
   onConfirm: () => {},
 });
 
-function showConfirm({ title, message, confirmText, variant, onConfirm }) {
-  confirmModal.value = { show: true, title, message, confirmText: confirmText || 'Confirm', variant: variant || 'primary', onConfirm };
+function showConfirm({ title, message, confirmText, variant, requireReason, onConfirm }) {
+  confirmModal.value = { 
+    show: true, 
+    title, 
+    message, 
+    confirmText: confirmText || 'Confirm', 
+    variant: variant || 'primary', 
+    requireReason: requireReason || false,
+    reason: '',
+    onConfirm 
+  };
 }
 
 function viewReceipt(url) {
@@ -246,6 +359,78 @@ async function rejectOrder(orderId) {
       }
     }
   });
+}
+
+async function forceApproveOrder(orderId) {
+  showConfirm({
+    title: 'Manually Mark as Paid',
+    message: 'Are you sure you want to mark this pending order as paid? This will instantly generate and send the tickets to the customer.',
+    confirmText: 'Mark as Paid & Issue Tickets',
+    variant: 'primary',
+    requireReason: true,
+    onConfirm: async (reason) => {
+      const token = localStorage.getItem('ticketr_admin_token');
+      actioning.value = orderId;
+      try {
+        const res = await fetch(`${config.public.apiBase}/orders/admin/${orderId}/force-approve`, {
+          method: 'PATCH',
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reason })
+        });
+        if (res.ok) {
+          toast.success('Order manually marked as paid!');
+          loadOrders();
+        } else {
+          const err = await res.json();
+          toast.error(err.message || 'Failed to mark order as paid');
+        }
+      } catch (err) {
+        toast.error('Error marking order as paid');
+      } finally {
+        actioning.value = null;
+      }
+    }
+  });
+}
+
+async function remindOrder(orderId) {
+  const order = orders.value.find(o => o._id === orderId);
+  if (!order) return;
+  openComposer(order);
+}
+
+async function sendCustomReminder() {
+  if (!composerModal.value.orderId) return;
+  
+  const token = localStorage.getItem('ticketr_admin_token');
+  isSending.value = true;
+  try {
+    const res = await fetch(`${config.public.apiBase}/orders/admin/${composerModal.value.orderId}/remind`, {
+      method: 'POST',
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        customSubject: composerModal.value.subject,
+        customMessage: composerModal.value.message,
+      }),
+    });
+    if (res.ok) {
+      toast.success('Reminder sent successfully');
+      composerModal.value.show = false;
+    } else {
+      const err = await res.json();
+      toast.error(err.message || 'Failed to send reminder');
+    }
+  } catch (e) {
+    toast.error('Network error');
+  } finally {
+    isSending.value = false;
+  }
 }
 
 async function loadTenantDetails() {

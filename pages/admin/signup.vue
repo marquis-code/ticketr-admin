@@ -11,9 +11,7 @@
           <!-- Logo & Header -->
           <div class="mb-10 text-center lg:text-left">
             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-700 flex items-center justify-center mb-6 shadow-xl shadow-primary/30 mx-auto lg:mx-0 transform hover:scale-105 transition-transform">
-              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-              </svg>
+              <Ticket class="w-6 h-6 text-white" />
             </div>
             <h1 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Register Organization</h1>
             <p class="text-sm text-gray-500 mt-2 font-medium">Create your account to start managing events.</p>
@@ -95,9 +93,7 @@
             <transition name="fade">
               <div v-if="errorMsg" class="p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
                 <div class="bg-red-100 p-1 rounded-full text-red-500 mt-0.5">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <AlertCircle class="w-4 h-4" />
                 </div>
                 <p class="text-red-700 text-sm font-medium">{{ errorMsg }}</p>
               </div>
@@ -108,11 +104,9 @@
               :disabled="submitting" 
               class="w-full btn-primary py-4 text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all mt-4"
             >
-              <span v-if="submitting" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <AppLoader v-if="submitting" size="sm" color="white" />
               <span v-else>Create Organization Account</span>
-              <svg v-if="!submitting" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <ArrowRight v-if="!submitting" class="w-5 h-5" />
             </button>
           </form>
 
@@ -170,7 +164,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import { Eye, EyeOff, Ticket, AlertCircle, ArrowRight } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
 

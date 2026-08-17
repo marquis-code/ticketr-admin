@@ -212,6 +212,7 @@
 </template>
 
 <script setup>
+
 import { toast } from 'vue-sonner';
 import { ref } from 'vue';
 import { Send, Check } from 'lucide-vue-next';
@@ -322,7 +323,7 @@ async function submitForm() {
 
     if (res.ok) {
       toast.success('Event published successfully!');
-      useRouter().push('/dashboard/events');
+      useRouter().push('/admin/events');
     } else {
       const err = await res.json();
       errorMsg.value = err.message || 'Failed to create event';

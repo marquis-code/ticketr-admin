@@ -142,6 +142,9 @@
                     <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">
                       ₦{{ tier.price.toLocaleString() }}
                     </span>
+                    <span v-if="tier.isActive === false" class="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-600 font-bold">
+                      Hidden
+                    </span>
                   </h4>
                   <p class="text-xs text-gray-500 mt-1">{{ tier.description || 'No description provided.' }}</p>
                   <p class="text-xs font-medium text-gray-700 mt-1">Capacity: {{ tier.soldCount }} / {{ tier.capacity }}</p>
@@ -192,8 +195,13 @@
             <label class="block text-[11px] font-medium text-gray-600 mb-1">Upload Ticket Banner (Optional)</label>
             <input type="file" @change="handleTierBanner" accept="image/*" class="w-full text-xs" />
             <div v-if="tierForm.templateImageUrl" class="mt-2">
-              <img :src="tierForm.templateImageUrl" class="h-16 rounded-md object-cover" />
+               <img :src="tierForm.templateImageUrl" class="h-16 rounded-md object-cover" />
             </div>
+          </div>
+          
+          <div class="pt-2 border-t mt-4 flex items-center gap-2">
+            <input type="checkbox" id="isActive" v-model="tierForm.isActive" class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" />
+            <label for="isActive" class="text-[11px] font-medium text-gray-600">Ticket is Visible & Active</label>
           </div>
 
           <div v-if="tierMsg" class="text-xs text-rose-500 mt-2">{{ tierMsg }}</div>
@@ -212,6 +220,7 @@
 </template>
 
 <script setup>
+
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ArrowLeft, Edit3, Plus, Save, X, Check, Loader2 } from 'lucide-vue-next';
@@ -265,7 +274,8 @@ const tierForm = ref({
   description: '',
   price: 0,
   capacity: 100,
-  templateImageUrl: null
+  templateImageUrl: null,
+  isActive: true
 });
 const tierBannerFile = ref(null);
 
@@ -353,7 +363,8 @@ function openEditTier(tier) {
     description: tier.description || '',
     price: tier.price,
     capacity: tier.capacity,
-    templateImageUrl: tier.templateImageUrl
+    templateImageUrl: tier.templateImageUrl,
+    isActive: tier.isActive !== undefined ? tier.isActive : true
   };
   tierBannerFile.value = null;
   tierMsg.value = '';
@@ -362,7 +373,7 @@ function openEditTier(tier) {
 function closeTierModal() {
   showAddTierModal.value = false;
   editingTier.value = null;
-  tierForm.value = { name: '', description: '', price: 0, capacity: 100, templateImageUrl: null };
+  tierForm.value = { name: '', description: '', price: 0, capacity: 100, templateImageUrl: null, isActive: true };
   tierBannerFile.value = null;
   tierMsg.value = '';
 }
@@ -392,6 +403,7 @@ async function saveTier() {
           description: tierForm.value.description,
           price: tierForm.value.price,
           capacity: tierForm.value.capacity,
+          isActive: tierForm.value.isActive,
         })
       });
 
@@ -422,6 +434,7 @@ async function saveTier() {
           description: tierForm.value.description,
           price: tierForm.value.price,
           capacity: tierForm.value.capacity,
+          isActive: tierForm.value.isActive,
         })
       });
       if (!res.ok) throw new Error((await res.json()).message);

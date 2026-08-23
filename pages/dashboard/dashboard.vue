@@ -66,7 +66,7 @@
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
           <h2 class="text-xl font-bold text-gray-900">My Events</h2>
-          <NuxtLink to="/admin/events/create" class="text-xs font-semibold text-primary hover:text-primary">
+          <NuxtLink to="/dashboard/events/create" class="text-xs font-semibold text-primary hover:text-primary">
             + Add New Event
           </NuxtLink>
         </div>
@@ -105,7 +105,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <NuxtLink :to="`/admin/events/${ev._id}/attendees`" class="btn-secondary text-xs !py-1 !px-3 flex items-center gap-1 justify-end">
+                  <NuxtLink :to="`/dashboard/events/${ev._id}/attendees`" class="btn-secondary text-xs !py-1 !px-3 flex items-center gap-1 justify-end">
                     Attendees <ClipboardList class="w-3 h-3" />
                   </NuxtLink>
                 </td>

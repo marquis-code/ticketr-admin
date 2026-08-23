@@ -95,7 +95,7 @@ async function verifyTicket(commit = false) {
   
   if (!token) {
     toast.error('You must be logged in as an Admin to scan tickets. Redirecting to login...');
-    router.push(`/admin/login?redirect=/admin/verify/${hash}`);
+    router.push(`/login?redirect=/dashboard/verify/${hash}`);
     return;
   }
 

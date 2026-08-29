@@ -103,6 +103,14 @@
                   >
                     {{ att.status === 'CHECKED_IN' ? 'Checked In' : 'Manual Check-in' }}
                   </button>
+                  <button
+                    @click="openChangeTierModal(att)"
+                    :disabled="att.status === 'CHECKED_IN'"
+                    class="btn-primary text-[10px] !py-1 !px-2 bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 shadow-none disabled:opacity-40"
+                    title="Change ticket tier"
+                  >
+                    Change Tier
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -152,6 +160,31 @@
       </div>
     </div>
 
+    <!-- Change Tier Modal -->
+    <div v-if="changeTierModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm px-4">
+      <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform scale-100 opacity-100 transition-all border border-indigo-50">
+        <h3 class="text-xl font-extrabold text-gray-900 mb-2">Change Ticket Tier</h3>
+        <p class="text-xs text-gray-600 mb-4">Select a new tier for ticket <strong>{{ changeTierModal.ticket.ticketNumber }}</strong>.</p>
+        
+        <select 
+          v-model="changeTierModal.newTierId" 
+          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 mb-4 focus:outline-none focus:border-primary bg-gray-50"
+        >
+          <option value="" disabled>Select new tier</option>
+          <option v-for="tier in tiers" :key="tier._id" :value="tier._id" :disabled="tier._id === changeTierModal.ticket.tierId?._id">
+            {{ tier.name }} - ₦{{ tier.price.toLocaleString() }}
+          </option>
+        </select>
+
+        <div class="flex gap-3">
+          <button @click="changeTierModal.show = false" class="w-1/2 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+          <button @click="submitChangeTier" :disabled="changeTierModal.submitting || !changeTierModal.newTierId" class="w-1/2 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition disabled:opacity-50">
+            {{ changeTierModal.submitting ? 'Updating...' : 'Change Tier' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -176,8 +209,16 @@ const updateEmailModal = ref({
   submitting: false,
 });
 
+const changeTierModal = ref({
+  show: false,
+  ticket: null,
+  newTierId: '',
+  submitting: false,
+});
+
 const searchQuery = ref('');
 const filterStatus = ref('ALL');
+const tiers = ref([]);
 
 const filteredAttendees = computed(() => {
   return attendees.value.filter((a) => {
@@ -218,6 +259,15 @@ async function loadAttendees() {
       const data = await res.json();
       eventInfo.value = data.event;
       attendees.value = data.attendees || [];
+    }
+    
+    // Fetch tiers
+    const resEvent = await fetch(`${config.public.apiBase}/events/${eventId.value}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (resEvent.ok) {
+      const eventData = await resEvent.json();
+      tiers.value = eventData.tiers || [];
     }
   } catch (err) {
     console.error('Error fetching attendees:', err);
@@ -312,6 +362,49 @@ async function submitUpdateEmail() {
   } catch (e) {
     console.error(e);
     alert('An error occurred.');
+  } finally {
+    modal.submitting = false;
+  }
+}
+
+function openChangeTierModal(ticket) {
+  changeTierModal.value = {
+    show: true,
+    ticket,
+    newTierId: '',
+    submitting: false,
+  };
+}
+
+async function submitChangeTier() {
+  const modal = changeTierModal.value;
+  if (!modal.newTierId) return;
+
+  const token = localStorage.getItem('ticketr_admin_token');
+  modal.submitting = true;
+  
+  try {
+    const res = await fetch(`${config.public.apiBase}/tickets/${modal.ticket._id}/change-tier`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ newTierId: modal.newTierId }),
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      modal.show = false;
+      alert(`Tier changed successfully! Price difference: ₦${data.priceDifference.toLocaleString()}`);
+      loadAttendees();
+    } else {
+      const err = await res.json();
+      alert(`Failed: ${err.message}`);
+    }
+  } catch (e) {
+    console.error(e);
+    alert('An error occurred while changing tier.');
   } finally {
     modal.submitting = false;
   }

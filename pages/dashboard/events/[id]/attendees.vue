@@ -55,7 +55,7 @@
       <!-- Table -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <TableLoadingState v-if="loading" message="Loading attendees..." />
-        <TableEmptyState v-else-if="filteredAttendees?.length === 0" title="No Attendees Found" message="No attendees found matching filter criteria." />
+        <TableEmptyState v-else-if="attendees.length === 0" title="No Attendees Found" message="No attendees found matching filter criteria." />
 
         <div v-else class="overflow-x-auto">
           <table class="w-full text-left border-collapse whitespace-nowrap">

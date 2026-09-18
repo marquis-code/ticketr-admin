@@ -165,8 +165,8 @@ const fetchEvents = async () => {
       }
     });
     if (res.ok) {
-      const data = await res.json();
-      events.value = data;
+      const payload = await res.json();
+      events.value = payload.data || payload;
     } else {
        const res2 = await fetch(`${config.public.apiBase}/events/tenant`, {
         headers: {
@@ -174,7 +174,8 @@ const fetchEvents = async () => {
         }
       });
       if (res2.ok) {
-         events.value = await res2.json();
+         const payload2 = await res2.json();
+         events.value = payload2.data || payload2;
       }
     }
   } catch (error) {

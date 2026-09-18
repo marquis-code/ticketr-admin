@@ -91,6 +91,11 @@
                     <span v-if="getGenderTag(att.attendeeName) === 'Male'" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wider border border-blue-200">Male</span>
                     <span v-if="getGenderTag(att.attendeeName) === 'Female'" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-pink-100 text-pink-700 uppercase tracking-wider border border-pink-200">Female</span>
                   </div>
+                  <div v-if="att.customData && Object.keys(att.customData).length > 0" class="mt-1.5 flex flex-wrap gap-1.5">
+                    <span v-for="(val, key) in att.customData" :key="key" class="text-[10px] font-medium bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">
+                      {{ key }}: <span class="font-bold text-gray-800">{{ val }}</span>
+                    </span>
+                  </div>
                 </td>
                 <td class="px-6 py-4 text-xs text-gray-600">{{ att.attendeeEmail }}</td>
                 <td class="px-6 py-4 text-xs text-gray-700">{{ att.tierId?.name || 'Standard' }}</td>
@@ -512,14 +517,31 @@ function downloadTicket(ticket) {
 
 function exportCSV() {
   if (attendees.value?.length === 0) return;
-  const headers = ['Ticket Number', 'Attendee Name', 'Attendee Email', 'Tier', 'Status'];
-  const rows = attendees.value.map(a => [
-    a.ticketNumber,
-    `"${a.attendeeName}"`,
-    a.attendeeEmail,
-    `"${a.tierId?.name || 'Standard'}"`,
-    a.status
-  ]);
+  
+  // Get all unique custom data keys across all attendees
+  const customKeys = new Set();
+  attendees.value.forEach(a => {
+    if (a.customData) {
+      Object.keys(a.customData).forEach(k => customKeys.add(k));
+    }
+  });
+  
+  const customHeaders = Array.from(customKeys);
+  const headers = ['Ticket Number', 'Attendee Name', 'Attendee Email', 'Tier', 'Status', ...customHeaders];
+  
+  const rows = attendees.value.map(a => {
+    const row = [
+      a.ticketNumber,
+      `"${a.attendeeName}"`,
+      a.attendeeEmail,
+      `"${a.tierId?.name || 'Standard'}"`,
+      a.status
+    ];
+    customHeaders.forEach(k => {
+      row.push(`"${a.customData?.[k] || ''}"`);
+    });
+    return row;
+  });
 
   const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
   const encodedUri = encodeURI(csvContent);

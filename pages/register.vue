@@ -159,7 +159,7 @@ async function handleSignup() {
       localStorage.setItem('ticketr_admin_user', JSON.stringify(data.user));
       localStorage.setItem('ticketr_admin_tenant', form.value.tenantSlug);
       
-      useRouter().push('/admin/dashboard');
+      useRouter().push('/dashboard');
     } else {
       const err = await res.json();
       errorMsg.value = err.message || 'Failed to create account. Please try again.';

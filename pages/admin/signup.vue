@@ -1,258 +1,172 @@
 <template>
-  <div class="min-h-screen flex w-full bg-white font-sans">
-    <!-- Left: Form Container -->
-    <div class="w-full lg:w-[55%] xl:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative bg-white z-10 shadow-2xl lg:shadow-none">
-      
-      <!-- Subtle top decorative element -->
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500"></div>
+  <div class="min-h-screen grid lg:grid-cols-[1.05fr_1fr] bg-paper">
+    <div class="flex flex-col justify-center px-5 sm:px-10 lg:px-16 xl:px-24 py-10">
+      <div class="w-full max-w-md mx-auto">
+        <NuxtLink to="/" class="flex items-center gap-2.5 mb-8">
+          <span class="w-9 h-9 rounded-xl bg-ink flex items-center justify-center">
+            <Ticket class="w-[18px] h-[18px] text-lime" />
+          </span>
+          <span class="font-display text-[22px] font-semibold tracking-[-0.04em] text-ink">ticketr.</span>
+        </NuxtLink>
 
-      <transition name="fade-slide" appear>
-        <div class="w-full max-w-md mx-auto py-8">
-          <!-- Logo & Header -->
-          <div class="mb-10 text-center lg:text-left">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-700 flex items-center justify-center mb-6 shadow-xl shadow-primary/30 mx-auto lg:mx-0 transform hover:scale-105 transition-transform">
-              <Ticket class="w-6 h-6 text-white" />
+        <h1 class="font-display text-3xl sm:text-4xl font-semibold text-ink tracking-[-0.03em]">Start selling.</h1>
+        <p class="text-sm text-muted mt-2">Create your organizer account and publish your first event.</p>
+
+        <form class="mt-7 space-y-3.5" @submit.prevent="submit">
+          <div>
+            <label class="label" for="name">Your name</label>
+            <input id="name" v-model.trim="form.name" type="text" autocomplete="name" class="input !py-3" placeholder="Ada Obi" />
+          </div>
+          <div>
+            <label class="label" for="organization">Organization</label>
+            <input id="organization" v-model.trim="form.organizationName" type="text" class="input !py-3" placeholder="Faculty of Science, UNILAG" @input="syncSlug" />
+          </div>
+          <div>
+            <label class="label" for="slug">Storefront handle</label>
+            <div class="flex items-center rounded-xl border border-line bg-paper px-3">
+              <input id="slug" v-model.trim="form.tenantSlug" type="text" class="flex-1 bg-transparent border-0 py-3 text-sm mono text-ink focus:outline-none focus:ring-0" placeholder="science-unilag" @input="slugEdited = true" />
+              <span class="text-[11px] text-muted shrink-0">.ticketr.org</span>
             </div>
-            <h1 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Register Organization</h1>
-            <p class="text-sm text-gray-500 mt-2 font-medium">Create your account to start managing events.</p>
+          </div>
+          <div>
+            <label class="label" for="email">Work email</label>
+            <input id="email" v-model.trim="form.email" type="email" autocomplete="email" class="input !py-3" placeholder="you@organization.com" />
+          </div>
+          <div>
+            <label class="label" for="password">Password</label>
+            <input id="password" v-model="form.password" type="password" autocomplete="new-password" class="input !py-3" placeholder="At least 8 characters with a number" />
+          </div>
+          <div>
+            <label class="label" for="confirm">Confirm password</label>
+            <input id="confirm" v-model="form.confirm" type="password" autocomplete="new-password" class="input !py-3" />
           </div>
 
-          <form @submit.prevent="handleSubmit" class="space-y-5">
-            <div class="space-y-4">
-              <div class="relative group">
-                <label class="block text-sm font-bold text-gray-700 mb-1.5">Organization Name</label>
-                <input
-                  v-model="form.organizationName"
-                  type="text"
-                  placeholder="e.g. Campus Events Board"
-                  required
-                  class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all shadow-sm"
-                />
-              </div>
+          <label class="flex items-start gap-2 text-[11.5px] text-muted leading-relaxed cursor-pointer pt-1">
+            <input v-model="form.terms" type="checkbox" class="mt-0.5 w-3.5 h-3.5 rounded border-line text-forest focus:ring-forest" />
+            <span>I agree to the <NuxtLink to="/legal/terms" class="text-ink underline decoration-lime decoration-2 underline-offset-2">organizer terms</NuxtLink> and understand fees are disclosed before payment.</span>
+          </label>
 
-              <div class="relative group">
-                <label class="block text-sm font-bold text-gray-700 mb-1.5">Subdomain Slug</label>
-                <div class="flex items-center shadow-sm rounded-xl">
-                  <input
-                    v-model="form.tenantSlug"
-                    type="text"
-                    placeholder="events"
-                    required
-                    class="w-full bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all relative z-10"
-                  />
-                  <span class="bg-gray-100 border border-gray-200 border-l-0 text-gray-500 text-sm px-4 py-3.5 rounded-r-xl whitespace-nowrap font-medium select-none z-0">
-                    .ticketr.org
-                  </span>
-                </div>
-              </div>
+          <p v-if="error" class="text-[12.5px] font-medium text-coral bg-coral/10 border border-coral/20 rounded-lg px-3.5 py-2.5">{{ error }}</p>
 
-              <div class="relative group">
-                <label class="block text-sm font-bold text-gray-700 mb-1.5">Full Name</label>
-                <input
-                  v-model="form.name"
-                  type="text"
-                  placeholder="John Organizer"
-                  required
-                  class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all shadow-sm"
-                />
-              </div>
+          <button type="submit" class="btn-primary w-full !py-3.5" :disabled="loading || !form.terms">
+            <span v-if="loading" class="w-4 h-4 border-2 border-paper/40 border-t-paper rounded-full animate-spin" />
+            {{ loading ? 'Creating account…' : 'Create organizer account' }}
+          </button>
+        </form>
 
-              <div class="relative group">
-                <label class="block text-sm font-bold text-gray-700 mb-1.5">Email Address</label>
-                <input
-                  v-model="form.email"
-                  type="email"
-                  placeholder="admin@organization.edu"
-                  required
-                  class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all shadow-sm"
-                />
-              </div>
+        <p class="text-xs text-muted mt-5">
+          Already have an account?
+          <NuxtLink to="/admin/login" class="font-semibold text-forest hover:underline">Sign in</NuxtLink>
+        </p>
+      </div>
+    </div>
 
-              <div class="relative group">
-                <label class="block text-sm font-bold text-gray-700 mb-1.5">Password</label>
-                <div class="relative shadow-sm rounded-xl">
-                  <input
-                    v-model="form.password"
-                    :type="showPassword ? 'text' : 'password'"
-                    placeholder="••••••••"
-                    required
-                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all pr-12"
-                  />
-                  <button
-                    type="button"
-                    @click="showPassword = !showPassword"
-                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-primary focus:outline-none transition-colors"
-                  >
-                    <Eye v-if="!showPassword" class="w-5 h-5" />
-                    <EyeOff v-else class="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <transition name="fade">
-              <div v-if="errorMsg" class="p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
-                <div class="bg-red-100 p-1 rounded-full text-red-500 mt-0.5">
-                  <AlertCircle class="w-4 h-4" />
-                </div>
-                <p class="text-red-700 text-sm font-medium">{{ errorMsg }}</p>
-              </div>
-            </transition>
-
-            <button 
-              type="submit" 
-              :disabled="submitting" 
-              class="w-full btn-primary py-4 text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all mt-4"
-            >
-              <AppLoader v-if="submitting" size="sm" color="white" />
-              <span v-else>Create Organization Account</span>
-              <ArrowRight v-if="!submitting" class="w-5 h-5" />
-            </button>
-          </form>
-
-          <p class="text-center text-sm text-gray-500 mt-8 font-medium">
-            Already have an account? 
-            <NuxtLink to="/login" class="font-bold text-primary hover:underline transition-all">Sign In</NuxtLink>
+    <aside class="hidden lg:flex relative overflow-hidden bg-ink">
+      <div class="absolute inset-0 bg-grid opacity-[0.12]" />
+      <div class="absolute -bottom-40 -right-20 w-[520px] h-[520px] rounded-full bg-lime/15 blur-[130px]" />
+      <div class="relative flex flex-col justify-center p-12 xl:p-16 w-full">
+        <span class="chip-ink !bg-white/10 !text-paper !border-white/15 w-fit">Why organizers switch</span>
+        <h2 class="font-display text-[2.6rem] leading-[1.03] font-semibold text-paper tracking-[-0.035em] mt-5">
+          Fewer disputes.<br />
+          <span class="text-lime">Cleaner books.</span>
+        </h2>
+        <ul class="mt-7 space-y-3.5 max-w-sm">
+          <li v-for="item in points" :key="item" class="flex items-start gap-3 text-[13px] text-paper/70">
+            <span class="w-5 h-5 rounded-full bg-lime text-ink flex items-center justify-center shrink-0 mt-0.5">
+              <Check class="w-3 h-3" />
+            </span>
+            {{ item }}
+          </li>
+        </ul>
+        <div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.05] p-4 max-w-sm">
+          <p class="text-[11px] text-paper/45 uppercase tracking-[0.14em] font-bold">Pricing</p>
+          <p class="text-paper text-sm mt-1 leading-relaxed">
+            No setup fee. A flat platform fee per ticket is shown to buyers at checkout — never hidden at the gateway.
           </p>
         </div>
-      </transition>
-    </div>
-
-    <!-- Right: Exciting Image Background -->
-    <div class="hidden lg:block lg:w-[45%] xl:w-1/2 relative overflow-hidden bg-gray-900">
-      <!-- Animated Background Image (Ken Burns Effect) -->
-      <div class="absolute inset-0 w-full h-full">
-        <img 
-          src="/student_event_auth.png" 
-          alt="Exciting Event Background" 
-          class="w-full h-full object-cover animate-ken-burns opacity-90"
-        />
       </div>
-      
-      <!-- Gradients for depth and readability -->
-      <div class="absolute inset-0 bg-gradient-to-br from-primary/60 via-purple-900/70 to-gray-900/90 mix-blend-multiply"></div>
-      <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-      <div class="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-30"></div>
-
-      <!-- Content Overlay -->
-      <div class="absolute inset-0 flex flex-col justify-end p-16 xl:p-24 pb-24 text-white z-20">
-        <transition name="fade-up" appear>
-          <div class="max-w-xl">
-            <!-- Live Indicator Badge -->
-            <div class="inline-flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full mb-8 border border-white/20 shadow-xl">
-              <span class="relative flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-              </span>
-              <span class="text-xs font-bold tracking-widest uppercase text-white/90">Live Operations</span>
-            </div>
-            
-            <h2 class="font-display text-4xl xl:text-5xl font-bold leading-[1.1] mb-6 text-white drop-shadow-2xl">
-              Create experiences <br/>
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">that matter.</span>
-            </h2>
-            
-            <p class="text-base xl:text-lg text-white/80 leading-relaxed font-light mb-10 border-l-2 border-primary/50 pl-6">
-              Join thousands of organizers powering their events with Ticketr. Seamless ticketing, powerful analytics, and instant payouts, all in one place.
-            </p>
-          </div>
-        </transition>
-      </div>
-    </div>
+    </aside>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { Eye, EyeOff, Ticket, AlertCircle, ArrowRight } from 'lucide-vue-next';
+<script setup lang="ts">
+import { Check, Ticket } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
 
-const config = useRuntimeConfig();
+const { hydrate } = useAuth();
 
-const submitting = ref(false);
-const errorMsg = ref('');
-const showPassword = ref(false);
-
-const form = ref({
+const form = reactive({
   name: '',
-  email: '',
-  password: '',
   organizationName: '',
   tenantSlug: '',
+  email: '',
+  password: '',
+  confirm: '',
+  terms: false,
 });
 
-async function handleSubmit() {
-  submitting.value = true;
-  errorMsg.value = '';
+const loading = ref(false);
+const error = ref('');
+const slugEdited = ref(false);
 
+const points = [
+  'Live inventory that counts holds, couples and tables',
+  'Bank-transfer approvals with duplicate-reference protection',
+  'Single-use QR codes and an atomic gate scanner',
+  'Revenue, fees and net payout reconciled per order',
+];
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+}
+
+function syncSlug() {
+  if (!slugEdited.value) form.tenantSlug = slugify(form.organizationName);
+}
+
+async function submit() {
+  error.value = '';
+  if (form.name.length < 2) return (error.value = 'Enter your full name.');
+  if (form.organizationName.length < 2) return (error.value = 'Enter your organization name.');
+  if (form.tenantSlug.length < 3) return (error.value = 'Choose a storefront handle of at least 3 characters.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email)) return (error.value = 'Enter a valid email address.');
+  if (form.password.length < 8 || !/[a-zA-Z]/.test(form.password) || !/[0-9]/.test(form.password)) {
+    return (error.value = 'Use at least 8 characters with a letter and a number.');
+  }
+  if (form.password !== form.confirm) return (error.value = 'The passwords do not match.');
+
+  loading.value = true;
   try {
-    const endpoint = `${config.public.apiBase}/auth/register`;
-    const payload = {
-      name: form.value.name,
-      email: form.value.email,
-      password: form.value.password,
-      role: 'ORGANIZER',
-      organizationName: form.value.organizationName,
-      tenantSlug: form.value.tenantSlug,
-    };
-
-    const res = await fetch(endpoint, {
+    const data = await apiRequest<any>('/auth/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      auth: false,
+      body: {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: 'ORGANIZER',
+        tenantSlug: form.tenantSlug,
+        organizationName: form.organizationName,
+      },
     });
-
-    if (res.ok) {
-      const data = await res.json();
+    if (typeof localStorage !== 'undefined') {
       localStorage.setItem('ticketr_admin_token', data.accessToken);
       localStorage.setItem('ticketr_admin_user', JSON.stringify(data.user));
-      useRouter().push('/dashboard');
-    } else {
-      const err = await res.json();
-      errorMsg.value = err.message || 'Registration failed';
     }
+    hydrate();
+    await navigateTo('/admin/dashboard');
   } catch (err) {
-    errorMsg.value = 'Network connection error';
+    error.value = errorMessage(err);
   } finally {
-    submitting.value = false;
+    loading.value = false;
   }
 }
+
+useSeoMeta({ title: 'Create an organizer account | Ticketr', robots: 'noindex, nofollow' });
 </script>
-
-<style scoped>
-/* Animations */
-.fade-slide-enter-active {
-  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.fade-slide-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.fade-up-enter-active {
-  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
-}
-.fade-up-enter-from {
-  opacity: 0;
-  transform: translateY(40px);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* Ken Burns effect for background image */
-@keyframes ken-burns {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.1); }
-}
-.animate-ken-burns {
-  animation: ken-burns 30s alternate ease-in-out infinite;
-}
-</style>

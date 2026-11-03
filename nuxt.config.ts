@@ -10,8 +10,8 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://api.ticketr.org/api/v1',
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
-      adminUrl: process.env.NUXT_PUBLIC_ADMIN_URL || 'http://localhost:3003',
-      publicUrl: process.env.NUXT_PUBLIC_PUBLIC_URL || 'https://ticketr.org',
+      adminUrl: process.env.NUXT_PUBLIC_ADMIN_URL || 'https://admin.ticketr.org',
+      publicUrl: process.env.NUXT_PUBLIC_PUBLIC_URL || 'https://www.ticketr.org',
       superAdminUrl: process.env.NUXT_PUBLIC_SUPERADMIN_URL || 'https://superadmin.ticketr.org',
     },
   },
